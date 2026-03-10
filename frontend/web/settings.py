@@ -80,8 +80,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'psychicdb',
-        'USER': 'psychic',
-        'PASSWORD': 'AVNS_VE21I2wmdg0Ed3EzHiS',
+        'USER': '',
+        'PASSWORD': '',
         'HOST': 'db-mysql-lon1-psychic-mood-do-user-22600583-0.d.db.ondigitalocean.com',
         'PORT': '25060',
         'OPTIONS': {
