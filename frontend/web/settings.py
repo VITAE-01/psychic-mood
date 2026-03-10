@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +27,7 @@ SECRET_KEY = 'django-insecure-%ft%*ggz)kg_b3oc7qdceo4ee(3zgj4ran0h&5g0#0_tg5&8sf
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+LOGIN_URL = 'account:login'
 
 # Application definition
 
@@ -57,7 +58,7 @@ ROOT_URLCONF = 'web.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -70,15 +71,24 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'web.wsgi.application'
-
+AUTH_USER_MODEL = "account.Account"
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'psychicdb',
+        'USER': 'psychic',
+        'PASSWORD': 'AVNS_VE21I2wmdg0Ed3EzHiS',
+        'HOST': 'db-mysql-lon1-psychic-mood-do-user-22600583-0.d.db.ondigitalocean.com',
+        'PORT': '25060',
+        'OPTIONS': {
+            'ssl': {
+                'ssl-mode': 'REQUIRED',
+            }
+        }
     }
 }
 
