@@ -2,19 +2,64 @@
 
 {% block content %}
 
-<h2>Welcome Back</h2>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8 col-12">
 
-<form method="POST" action="{% url 'account:login' %}?next={{ request.path }}">
-    {% csrf_token %}
+            <div class="card shadow-sm">
+                <div class="card-body">
 
-    {{ form.as_p }}
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold mt-4" style="color:#0d6efd;"> Log in to Your Account</h2>
+                        <p class="text-muted">Welcome back! 👋! Please enter your details.</p>
+                    </div>
 
-    <button type="submit">Sign In</button>
+                    <div class="card border-0 p-4">
 
-</form>
+                        <form method="POST" autocomple="off" data-form-no-store action="{% url 'account:login' %}?next={{ request.path }}">
+                        {% csrf_token %}
+    
+                            <div class="mx-auto" style="width: 75%;">
+                                {{ form.as_p }}
 
-<p>Forgot your password? <a href="{% url 'account:forgot-password' %}">Reset it here</a></p>
+                                <div class="d-flex justify-content-center">
+                                    <button type="submit" class="btn btn-primary w-50 py-2 mt-2 justify-center" style="border-radius: 10px;">
+                                        Sign In
+                                    </button>
+                                </div>
+                            </div>
 
-<p>Don't have an account? <a href="{% url 'account:register' %}">Register here</a></p>
+                        </form>
+
+                        <p class="text-center mt-3">Forgot your password? <a href="{% url 'account:forgot-password' %}" class="small text-primary">Click here</a></p>
+
+                        <p class="text-center">Don't have an account? <a href="{% url 'account:register' %}" class="small text-primary">Register here</a></p>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 {% endblock %}
+
+<script>
+    // Disable browser autocomplete for the form
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        if (form) {
+            form.setAttribute('autocomplete', 'off');
+        }
+    });
+
+    // Prevent browser from storing form data
+    document.addEventListener('submit', function(event) {
+        const form = event.target;
+        if (form && form.matches('form')) {
+            form.setAttribute('autocomplete', 'off');
+            form.setAttribute('data-form-no-store', 'true');
+        }
+    });
+</script>
