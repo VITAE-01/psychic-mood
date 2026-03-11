@@ -53,16 +53,25 @@ def create_password(request):
 
             email = request.session.get("registration_email")
 
-            user = User.objects.get(email=email)
+            try:
+                user = User.objects.get(email=email)
+                user.set_password(form.cleaned_data["password1"])
+                user.is_active = True
+                user.save()
 
-            user.set_password(form.cleaned_data["password1"])
-            user.is_active = True
-            user.save()
+                # --- Log user to CSV only after password is set ---
+                write_active_user_to_csv(user)
+                # --- End of CSV logging ---
 
-            # --- Log user to CSV only after password is set ---
-            write_active_user_to_csv(user)
+                # Clear the email from session after successful password creation
+                if "registration_email" in request.session:
+                    del request.session["registration_email"]
 
-            return redirect("account:login")
+                return redirect("account:login")
+            
+            except Exception as e:
+                form.add_error(None, "You must be a registered user.")
+                return redirect("account:register")
 
     else:
         form = CreatePasswordForm()
@@ -88,6 +97,7 @@ def login_view(request):
 
             else:
                 form.add_error(None, "Invalid email or password")
+                form.cleaned_data["password"] = ""  # Clear password field
 
     else:
         form = LoginForm()

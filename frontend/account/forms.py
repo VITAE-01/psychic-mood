@@ -71,12 +71,12 @@ class RegisterForm(forms.ModelForm):
 class CreatePasswordForm(forms.Form):
 
     password1 = forms.CharField(
-        widget=forms.PasswordInput,
+        widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Create a password"}),
         label="Password"
     )
 
     password2 = forms.CharField(
-        widget=forms.PasswordInput,
+        widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Confirm your password"}),
         label="Confirm Password"
     )
 
@@ -98,6 +98,8 @@ class CreatePasswordForm(forms.Form):
 class LoginForm(forms.Form):
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)
+    email = forms.EmailField(widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "Enter your email"}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Enter your password"}))
 
 
 class ForgotPasswordForm(forms.Form):
