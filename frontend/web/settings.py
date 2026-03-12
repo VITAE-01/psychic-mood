@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -79,11 +81,11 @@ AUTH_USER_MODEL = "account.Account"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'psychicdb',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': 'db-mysql-lon1-psychic-mood-do-user-22600583-0.d.db.ondigitalocean.com',
-        'PORT': '25060',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
         'OPTIONS': {
             'ssl': {
                 'ssl-mode': 'REQUIRED',
