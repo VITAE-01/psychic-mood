@@ -150,8 +150,9 @@ def reset_password(request):
                 del request.session['reset_email']
                 
                 return redirect("account:login")
-            except Account.DoesNotExist:
+            except Exception as e:
                 form.add_error(None, "No user found with this email.")
+                return render(request, "account/create_password.html", {"form": form})
     else:
         form = CreatePasswordForm()
 
