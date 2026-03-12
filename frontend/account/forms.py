@@ -54,6 +54,8 @@ class RegisterForm(forms.ModelForm):
                 
     def clean_height(self):
         height = self.cleaned_data.get("height")
+        if height is None:
+            return height
         if height > 300:
             raise forms.ValidationError("Height cannot be greater than 300 cm.")
         if height is not None and height < 0:
@@ -62,6 +64,8 @@ class RegisterForm(forms.ModelForm):
 
     def clean_weight(self):
         weight = self.cleaned_data.get("weight")
+        if weight is None:
+            return weight
         if weight > 500:
             raise forms.ValidationError("Weight cannot be greater than 500 kg.")
         if weight is not None and weight < 0:
