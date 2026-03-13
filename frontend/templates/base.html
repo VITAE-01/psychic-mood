@@ -67,7 +67,23 @@ input[type="number"] {
 </style>
 <body>
 
-<h1 class="page-title">Psychic Mood</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h1 class="page-title">Psychic Mood</h1>
+
+        <div class="d-flex align-items-center gap-3">
+
+            <span>Welcome {{ request.user.first_name }}</span>
+
+            {% if show_logout_button %}
+                <a href="{% url 'account:logout' %}">
+                    <button class="btn btn-danger" style="border-radius: 10px;">Logout</button>
+                </a>
+            {% endif %}
+            
+        </div>
+    </div>
+
 
 {% block content %}
 {% endblock %}
