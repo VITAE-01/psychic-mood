@@ -71,17 +71,17 @@ input[type="number"] {
 
         <h1 class="page-title">Psychic Mood</h1>
 
-        <div class="d-flex align-items-center gap-3">
+        {% if show_logout_button %}
+            <div class="d-flex align-items-center gap-3">
 
-            <span>Welcome {{ request.user.first_name }}</span>
+                <span>Welcome {{ request.user.first_name }}</span>
 
-            {% if show_logout_button %}
-                <a href="{% url 'account:logout' %}">
-                    <button class="btn btn-danger" style="border-radius: 10px;">Logout</button>
-                </a>
-            {% endif %}
-            
-        </div>
+                    <a href="{% url 'account:logout' %}">
+                        <button class="btn btn-danger" style="border-radius: 10px;">Logout</button>
+                    </a>
+
+            </div>
+        {% endif %}
     </div>
 
 
