@@ -108,9 +108,9 @@ class LoginForm(forms.Form):
 
 class ForgotPasswordForm(forms.Form):
     email = forms.EmailField()
-    email = forms.EmailField(widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "Enter your email"}))
+    email = forms.EmailField(widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "Enter your registered email"}))
     def clean_email(self):
         email = self.cleaned_data.get("email")
         if not Account.objects.filter(email=email).exists():
-            raise forms.ValidationError("No account found with this email address.")
+            raise forms.ValidationError("Sorry! Email address not found. Please try again.")
         return email
