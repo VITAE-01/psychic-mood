@@ -7,6 +7,7 @@ from .forms import LoginForm
 from .forms import ForgotPasswordForm
 from django.contrib.auth import get_user_model, authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
 from .utils import write_active_user_to_csv
 
 
@@ -16,7 +17,7 @@ User = get_user_model()
 # Create your views here.
 # /account -> index view will be called when the user visits the account page.
 def index(request):
-    return HttpResponse("This is the landing page.")
+    return redirect("dashboard:index")  # Redirect to dashboard page for now, we will change this later to a landing page.
 
 def signup(request):
 
@@ -45,33 +46,39 @@ def signup(request):
 
 
 def create_password(request):
+    email = request.session.get("registration_email")
 
+    # if no email in session, redirect to signup page
+    if not email:
+        return redirect("account:register")
+    
+    try:
+        user = User.objects.get(email=email, is_active=False)
+        if user.is_active:
+            # If user is already active, redirect to login page
+            return redirect("account:login")
+    except User.DoesNotExist:
+        # If no user found with the email, redirect to signup page
+        return redirect("account:register")
+    
     if request.method == "POST":
         form = CreatePasswordForm(request.POST)
 
         if form.is_valid():
 
-            email = request.session.get("registration_email")
+            user = User.objects.get(email=email)
+            user.set_password(form.cleaned_data["password1"])
+            user.is_active = True
+            user.save()
 
-            try:
-                user = User.objects.get(email=email)
-                user.set_password(form.cleaned_data["password1"])
-                user.is_active = True
-                user.save()
+            # --- Log user to CSV only after password is set ---
+            write_active_user_to_csv(user)
+            # --- End of CSV logging ---
 
-                # --- Log user to CSV only after password is set ---
-                write_active_user_to_csv(user)
-                # --- End of CSV logging ---
+            # Clear the email from session after successful password creation
+            request.session.pop("registration_email", None)
 
-                # Clear the email from session after successful password creation
-                if "registration_email" in request.session:
-                    del request.session["registration_email"]
-
-                return redirect("account:login")
-            
-            except Exception as e:
-                form.add_error(None, "You must be a registered user.")
-                return redirect("account:register")
+            return redirect("account:login")
 
     else:
         form = CreatePasswordForm()
@@ -93,7 +100,7 @@ def login_view(request):
 
             if user is not None:
                 login(request, user)
-                return redirect("account:profile")
+                return redirect("dashboard:index")
 
             else:
                 form.add_error(None, "Invalid email or password")
@@ -106,11 +113,13 @@ def login_view(request):
 
 
 @login_required
+@never_cache
 def profile(request):
-    return render(request, "account/profile.html")
+    return render(request, "account/profile.html", { 'show_logout_button': True })
 
 
 @login_required
+@never_cache
 def edit_profile(request):
     return HttpResponse("This is the edit profile page.")
 
