@@ -1,3 +1,5 @@
+import email
+
 from django import forms
 from .models import Account
 from datetime import date
@@ -11,7 +13,14 @@ GENDER_CHOICES = [
     ('other', 'Prefer not to say'),
 ]
 
-max_dob = date.today().replace(year=date.today().year - 18)
+AGE_CHOICES = [
+    ("", "Select"),
+    ('18-24', '18-24'),
+    ('25-34', '25-34'),
+    ('35-44', '35-44'),
+    ('45-54', '45-54'),
+    ('55+', '55+'),
+]
 
 
 class RegisterForm(forms.ModelForm):
@@ -19,39 +28,27 @@ class RegisterForm(forms.ModelForm):
     class Meta:
         model = Account
         fields = [
-            "first_name",
-            "last_name",
-            "email",
-            "date_of_birth",
+            "username",
+            "age_range",
             "gender",
             "height",
             "weight",
         ]
 
         widgets = {
-        "first_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your first name"}),
-        "last_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your last name"}),
-        "email": forms.EmailInput(attrs={"class": "form-control", "placeholder": "Enter your email"}),
-        "date_of_birth": forms.DateInput(attrs={"class": "form-control", "type": "date", "max": max_dob.strftime("%Y-%m-%d")}),
-        "gender": forms.Select(attrs={"class": "form-select"}, choices=GENDER_CHOICES),
-        "height": forms.NumberInput(attrs={"class": "form-control", "placeholder": "e.g 160", "min": 0}),
-        "weight": forms.NumberInput(attrs={"class": "form-control", "placeholder": "e.g 55", "min": 0}),
-    }
+            "username": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your username"}),
+            "age_range": forms.Select(attrs={"class": "form-select"}, choices=AGE_CHOICES),
+            "gender": forms.Select(attrs={"class": "form-select"}, choices=GENDER_CHOICES),
+            "height": forms.NumberInput(attrs={"class": "form-control", "placeholder": "e.g 160", "min": 0}),
+            "weight": forms.NumberInput(attrs={"class": "form-control", "placeholder": "e.g 55", "min": 0}),
+        }
 
-    def clean_date_of_birth(self):
-        dob = self.cleaned_data.get("date_of_birth")
-        if dob is None:
-            raise forms.ValidationError("This field is required.")
-        
-        if dob > date.today():
-            raise forms.ValidationError("Date of birth cannot be in the future.")
-        
-        today = date.today()
-        age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
-        if age < 18:
-            raise forms.ValidationError("You must be at least 18 years old to register.")
-        return dob
-                
+    def clean_username(self):
+        username = self.cleaned_data.get("username")
+        if Account.objects.filter(username=username).exists():
+            raise forms.ValidationError("Sorry! Username is already taken. Please choose a different username.")
+        return username
+
     def clean_height(self):
         height = self.cleaned_data.get("height")
         if height is None:
@@ -100,17 +97,17 @@ class CreatePasswordForm(forms.Form):
     
 
 class LoginForm(forms.Form):
-    email = forms.EmailField()
+    username = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput)
-    email = forms.EmailField(widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "Enter your email"}))
+    username = forms.CharField(widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your username"}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Enter your password"}))
 
 
 class ForgotPasswordForm(forms.Form):
-    email = forms.EmailField()
-    email = forms.EmailField(widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "Enter your registered email"}))
-    def clean_email(self):
-        email = self.cleaned_data.get("email")
-        if not Account.objects.filter(email=email).exists():
-            raise forms.ValidationError("Sorry! Email address not found. Please try again.")
-        return email
+    username = forms.CharField()
+    username = forms.CharField(widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter your username"}))
+    def clean_username(self):
+        username = self.cleaned_data.get("username")
+        if not Account.objects.filter(username=username).exists():
+            raise forms.ValidationError("Sorry! Username not found. Please try again.")
+        return username
