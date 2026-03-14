@@ -31,7 +31,7 @@ def signup(request):
             user.is_active = False         # until email verification
             user.save()
 
-            request.session["registration_email"] = user.email
+            request.session["registration_username"] = user.username
 
             return redirect("account:create-password")
 
@@ -46,19 +46,20 @@ def signup(request):
 
 
 def create_password(request):
-    email = request.session.get("registration_email")
+    # Get username from session
+    username = request.session.get("registration_username")
 
-    # if no email in session, redirect to signup page
-    if not email:
+    # if no username in session, redirect to signup page
+    if not username:
         return redirect("account:register")
     
     try:
-        user = User.objects.get(email=email, is_active=False)
+        user = User.objects.get(username=username, is_active=False)
         if user.is_active:
             # If user is already active, redirect to login page
             return redirect("account:login")
     except User.DoesNotExist:
-        # If no user found with the email, redirect to signup page
+        # If no user found with the username, redirect to signup page
         return redirect("account:register")
     
     if request.method == "POST":
@@ -66,7 +67,7 @@ def create_password(request):
 
         if form.is_valid():
 
-            user = User.objects.get(email=email)
+            user = User.objects.get(username=username)
             user.set_password(form.cleaned_data["password1"])
             user.is_active = True
             user.save()
@@ -75,8 +76,8 @@ def create_password(request):
             write_active_user_to_csv(user)
             # --- End of CSV logging ---
 
-            # Clear the email from session after successful password creation
-            request.session.pop("registration_email", None)
+            # Clear the username from session after successful password creation
+            request.session.pop("registration_username", None)
 
             return redirect("account:login")
 
@@ -93,17 +94,17 @@ def login_view(request):
 
         if form.is_valid():
 
-            email = form.cleaned_data["email"]
+            username = form.cleaned_data["username"]
             password = form.cleaned_data["password"]
 
-            user = authenticate(request, username=email, password=password)
+            user = authenticate(request, username=username, password=password)
 
             if user is not None:
                 login(request, user)
                 return redirect("dashboard:index")
 
             else:
-                form.add_error(None, "Invalid email or password")
+                form.add_error(None, "Invalid username or password")
                 form.cleaned_data["password"] = ""  # Clear password field
 
     else:
@@ -129,8 +130,8 @@ def forgot_password(request):
         form = ForgotPasswordForm(request.POST)
 
         if form.is_valid():
-            # Here you would typically send an email with a password reset link, but for simplicity, we'll just store the email in the session and redirect to the reset password page.
-            request.session['reset_email'] = form.cleaned_data['email']
+            # Here you would typically send an email with a password reset link, but for simplicity, we'll just store the username in the session and redirect to the reset password page.
+            request.session['reset_username'] = form.cleaned_data['username']
             return redirect("account:reset-password")
 
     else:
@@ -140,10 +141,10 @@ def forgot_password(request):
 
 
 def reset_password(request):
-    # Get email from session
-    email = request.session.get('reset_email')
-    if not email:
-        # If no email in session, redirect to forgot-password
+    # Get username from session
+    username = request.session.get('reset_username')
+    if not username:
+        # If no username in session, redirect to forgot-password
         return redirect("account:forgot-password")
 
     if request.method == "POST":
@@ -151,16 +152,16 @@ def reset_password(request):
         if form.is_valid():
             password = form.cleaned_data.get("password1")
             try:
-                user = Account.objects.get(email=email)
+                user = Account.objects.get(username=username)
                 user.set_password(password)
                 user.save()
                 
-                # Clear email from session after reset
-                del request.session['reset_email']
+                # Clear username from session after reset
+                del request.session['reset_username']
                 
                 return redirect("account:login")
             except Exception as e:
-                form.add_error(None, "No user found with this email.")
+                form.add_error(None, "No user found with this username.")
                 return render(request, "account/create_password.html", {"form": form})
     else:
         form = CreatePasswordForm()

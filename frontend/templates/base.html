@@ -76,7 +76,7 @@ input[type="number"] {
         {% if show_logout_button %}
             <div class="d-flex align-items-center gap-3 me-3">
 
-                <span>Hi {{ request.user.first_name }}</span>
+                <span>Hi {{ request.user.username }}</span>
 
                     <a href="{% url 'account:logout' %}">
                         <button class="btn btn-danger" style="border-radius: 10px;">Logout</button>
