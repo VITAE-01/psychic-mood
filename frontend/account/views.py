@@ -17,7 +17,7 @@ User = get_user_model()
 # Create your views here.
 # /account -> index view will be called when the user visits the account page.
 def index(request):
-    return redirect("dashboard:index")  # Redirect to dashboard page for now, we will change this later to a landing page.
+    return render(request, "account/index.html", { 'show_signup_button': not request.user.is_authenticated })
 
 def signup(request):
 
@@ -171,4 +171,4 @@ def reset_password(request):
 
 def logout_view(request):
     logout(request)
-    return redirect("account:login")
+    return redirect("landing-page")

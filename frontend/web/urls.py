@@ -20,7 +20,7 @@ from account.views import index
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', index),
+    path('', index, name='landing-page'),
     path('account/', include('account.urls')),
     path('dashboard/', include('dashboard.urls')),
 ]

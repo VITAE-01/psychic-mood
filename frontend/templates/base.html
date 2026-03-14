@@ -73,7 +73,15 @@ input[type="number"] {
             <h1 class="page-title">Psychic Mood</h1>
         </a>
 
-        {% if show_logout_button %}
+        {% if show_signup_button %}
+            <div class="d-flex align-items-center gap-3 me-3">
+                <a href="{% url 'account:register' %}">
+                    <button class="btn btn-primary" style="border-radius: 10px;">Sign In</button>
+                </a>
+            </div>
+        {% endif %}
+
+        {% if request.user.is_authenticated %}
             <div class="d-flex align-items-center gap-3 me-3">
 
                 <span>Hi {{ request.user.username }}</span>
