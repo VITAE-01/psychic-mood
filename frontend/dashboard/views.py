@@ -7,4 +7,4 @@ from django.views.decorators.cache import never_cache
 @login_required
 @never_cache
 def dashboard_index(request):
-    return render(request, 'dashboard/dashboard_index.html', {'show_logout_button': True})
+    return render(request, 'dashboard/dashboard_index.html')

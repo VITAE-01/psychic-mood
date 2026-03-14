@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8 col-12">
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold mt-4" style="color:#0d6efd;"> Participant Consent Information </h2>
+                    </div>
+
+                    <div class="card border-0 p-3" style="background-color: #f8f9fa;">
+                        <p class="mb-3"> Welcome to the activty and mood study — a research project exploring how physical activity relates to emotional wellbeing. </p>
+                        <p class="mb-3 fw-bold"> The aim is to design and implement a system that helps users visualize how their physical activity patterns may relate with their mood trends.</p>
+                        
+                        <ul class="mb-3">
+                            <li style="font-style: italic;"> Participation is voluntary. </li>
+                            <li style="font-style: italic;"> You can withdraw at any time without any consequences. </li>
+                            <li style="font-style: italic;"> Your data will be used solely for research purposes. </li>
+                            <li style="font-style: italic;"> We will <span style="font-weight: bold;"> NOT </span>  collect any personally identifiable information, and all data will be anonymized. </li>
+                            <li style="font-style: italic;"> We will ask you to share your behavioural beliefs and attitudes towards physical activity on a weekly basis. </li>
+                            <li style="font-style: italic;"> We will ask about your physical activity when you use the app by reporting your daily activity levels. </li>
+                            <li style="font-style: italic;"> We will also ask you to complete brief mood surveys after each activity session on a daily basis. </li>
+                            <li style="font-style: italic;"> Optional demographic information will help us better understand the diverse perspectives of our participants. </li>
+                            <li style="font-style: italic;"> All data is anonymized and securely stored, ensuring your privacy is protected. </li>
+                        </ul>
+
+                        <p class="mb-3 fw-bold" style="color: red"> The study has received ethical approval from the University of Greater Manchester Research Ethics Committee </p>
+                        <p class="mb-1"> By participating in this study, you acknowledge that you have read and understood the information provided about the research. </p>
+                        <p class="mb-1"> You voluntarily agree to participate in this study by providing self‑reports about behavioural belief, physical activity and mood. </p> 
+                        <p class="mb-1"> Your participation is crucial for advancing our understanding of the research topic, and we appreciate your contribution to this important work.</p>
+                        
+                        <div class="d-flex justify-content-center">
+                            <a href="{% url 'account:register' %}"
+                            class="btn btn-primary w-100 py-2 mt-2"
+                            style="border-radius: 10px;">
+                                Yes, I consent
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
