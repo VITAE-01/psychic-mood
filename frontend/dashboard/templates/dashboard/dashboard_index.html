@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block content %}
 
 <div class="container my-5">
@@ -9,12 +9,245 @@
             <div class="card shadow-sm px-4 py-5">
                 <div class="card-body justify-center text-center">
                     <h3 class="card-title mb-4">Dashboard Overview</h3>
-                    <p class="card-text">Here you can check in your daily activities and track mood trends.</p>
-                    <div></div>
-                    <a href="#" class="btn btn-secondary mt-3">Check In activities info</a>
+                    <p class="card-text">Here you can log daily activity.</p>
+                <div>
+
+                </div>
+                    <a href="#" class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#activityModal">
+                        Check-In activity info
+                    </a>
                 </div>
             </div>
         
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="activityModal" tabindex="-1" aria-labelledby="activityModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="activityModalLabel">Check-in</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="checkin-progress-wrapper mb-4">
+                    <div class="checkin-progress d-flex justify-content-center align-items-center gap-2">
+                        <div id="prog1" class="progress-step active">Add beliefs</div>
+                        <div class="progress-line"></div>
+                        <div id="prog2" class="progress-step">Add activities</div>
+                        <div class="progress-line"></div>
+                        <div id="prog3" class="progress-step">Add mood</div>
+                    </div>
+                </div>
+
+
+                <form id="checkinForm" method="POST" action="{% url 'dashboard:activity_checkin' %}">
+                    {% csrf_token %}
+
+                    <!-- STEP 1: Behaviour Beliefs -->
+                    <div id="step1" class="step-content">
+                        <h5 class="mb-3">Behavioural Beliefs</h5>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">I believe that physical activity will improve my mood</label>
+                            <select name="belief_improve_mood" class="form-select belief-field">
+                                <option value="">Select an option</option>
+                                <option value="1">Strongly disagree</option>
+                                <option value="2">Disagree</option>
+                                <option value="3">Neutral</option>
+                                <option value="4">Agree</option>
+                                <option value="5">Strongly agree</option>
+                            </select>
+                            <div class="text-danger small mt-1" id="error-belief_improve_mood"></div>
+
+                            <label class="form-label mt-3">I'm confident I can engage in physical activity when I intend to</label>
+                            <select name="belief_confidence" class="form-select belief-field">
+                                <option value="">Select an option</option>
+                                <option value="1">Strongly disagree</option>
+                                <option value="2">Disagree</option>
+                                <option value="3">Neutral</option>
+                                <option value="4">Agree</option>
+                                <option value="5">Strongly agree</option>
+                            </select>
+                            <div class="text-danger small mt-1" id="error-belief_confidence"></div>
+
+                            <label class="form-label mt-3">I did not have enough time to engage in physical activity</label>
+                            <select name="belief_time" class="form-select belief-field">
+                                <option value="">Select an option</option>
+                                <option value="1">Strongly disagree</option>
+                                <option value="2">Disagree</option>
+                                <option value="3">Neutral</option>
+                                <option value="4">Agree</option>
+                                <option value="5">Strongly agree</option>
+                            </select>
+                            <div class="text-danger small mt-1" id="error-belief_time"></div>
+
+                            <label class="form-label mt-3">I feel too tired to engage in physical activity</label>
+                            <select name="belief_tired" class="form-select belief-field">
+                                <option value="">Select an option</option>
+                                <option value="1">Strongly disagree</option>
+                                <option value="2">Disagree</option>
+                                <option value="3">Neutral</option>
+                                <option value="4">Agree</option>
+                                <option value="5">Strongly agree</option>
+                            </select>
+                            <div class="text-danger small mt-1" id="error-belief_tired"></div>
+
+                            <label class="form-label mt-3">Other responsibilities prevented me from being physically active</label>
+                            <select name="belief_responsibilities" class="form-select belief-field">
+                                <option value="">Select an option</option>
+                                <option value="1">Strongly disagree</option>
+                                <option value="2">Disagree</option>
+                                <option value="3">Neutral</option>
+                                <option value="4">Agree</option>
+                                <option value="5">Strongly agree</option>
+                            </select>
+                            <div class="text-danger small mt-1" id="error-belief_responsibilities"></div>
+
+                        </div>
+
+                        <button type="button" class="btn btn-primary w-100" onclick="nextStep(2)">
+                            Next
+                        </button>
+                    </div>
+
+                    <!-- STEP 2: Physical Activity -->
+                    <div id="step2" class="step-content" style="display:none;">
+                        <h5 class="mb-3">Physical Activity</h5>
+
+                        <div class="mb-3">
+                            <label class="form-label">Performed physical activities ?</label>
+                            <select name="performed_activity" class="form-select" id="performed_activity">
+                                <option value="">Select an option</option>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                            <div class="text-danger small mt-1" id="error-performed_activity"></div>
+
+                            <div id="activity_details" style="display:none;">
+                                <label class="form-label">Walking</label>
+                                <select name="walking" class="form-select activity-field">
+                                    <option value="">Select duration</option>
+                                    <option value="1">0 - 15 mins</option>
+                                    <option value="2">15 - 30 mins</option>
+                                    <option value="3">30 - 45 mins</option>
+                                    <option value="4">45 mins +</option>
+                                </select>
+
+                                <label class="form-label">Running</label>
+                                <select name="running" class="form-select activity-field">
+                                    <option value="">Select duration</option>
+                                    <option value="1">0 - 15 mins</option>
+                                    <option value="2">15 - 30 mins</option>
+                                    <option value="3">30 - 45 mins</option>
+                                    <option value="4">45 mins +</option>
+                                </select>
+
+                                <label class="form-label">Cycling</label>
+                                <select name="cycling" class="form-select activity-field">
+                                    <option value="">Select duration</option>
+                                    <option value="1">0 - 15 mins</option>
+                                    <option value="2">15 - 30 mins</option>
+                                    <option value="3">30 - 45 mins</option>
+                                    <option value="4">45 mins +</option>
+                                </select>
+
+                                <label class="form-label">Gym</label>
+                                <select name="gym" class="form-select activity-field">
+                                    <option value="">Select duration</option>
+                                    <option value="1">0 - 15 mins</option>
+                                    <option value="2">15 - 30 mins</option>
+                                    <option value="3">30 - 45 mins</option>
+                                    <option value="4">45 mins +</option>
+                                </select>
+
+                                <label class="form-label">Sports</label>
+                                <select name="sport" class="form-select activity-field">
+                                    <option value="">Select duration</option>
+                                    <option value="1">0 - 15 mins</option>
+                                    <option value="2">15 - 30 mins</option>
+                                    <option value="3">30 - 45 mins</option>
+                                    <option value="4">45 mins +</option>
+                                </select>
+
+                                <label class="form-label">Others</label>
+                                <select name="others" class="form-select activity-field">
+                                    <option value="">Select duration</option>
+                                    <option value="1">0 - 15 mins</option>
+                                    <option value="2">15 - 30 mins</option>
+                                    <option value="3">30 - 45 mins</option>
+                                    <option value="4">45 mins +</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-secondary w-100 mb-2" onclick="nextStep(1)">
+                            Back
+                        </button>
+                        <button type="button" class="btn btn-primary w-100" onclick="nextStep(3)">
+                            Next
+                        </button>
+                    </div>
+
+                    <!-- STEP 3: Mood -->
+                    <div id="step3" class="step-content" style="display:none;">
+                        <h5 class="mb-3">Mood Check‑In</h5>
+
+                        <div class="mb-3 text-center">
+                            <label class="form-label">Select the mood that reflects how you're feeling after physical activity</label>
+                            <div class="text-danger small mt-1" id="error-mood"></div>
+
+                            <div class="d-flex justify-content-center gap-5 my-3 mood-options">
+
+                                <div class="mood-item" data-value="low">
+                                    <img src="{% static 'dashboard/images/low.png' %}" class="mood-img">
+                                    <div class="mood-label">Low</div>
+                                </div>
+
+                                <div class="mood-item" data-value="tired">
+                                    <img src="{% static 'dashboard/images/tired.png' %}" class="mood-img">
+                                    <div class="mood-label">Tired</div>
+                                </div>
+
+                                <div class="mood-item" data-value="okay">
+                                    <img src="{% static 'dashboard/images/okay.png' %}" class="mood-img">
+                                    <div class="mood-label">Okay</div>
+                                </div>
+
+                                <div class="mood-item" data-value="fulfilled">
+                                    <img src="{% static 'dashboard/images/fulfilled.png' %}" class="mood-img">
+                                    <div class="mood-label">Fulfilled</div>
+                                </div>
+
+                                <div class="mood-item" data-value="energized">
+                                    <img src="{% static 'dashboard/images/energized.png' %}" class="mood-img">
+                                    <div class="mood-label">Energized</div>
+                                </div>
+
+                            </div>
+
+                            <!-- Hidden input to store the selected mood -->
+                            <input type="hidden" name="mood" id="mood_value">
+                        </div>
+
+
+                        <button type="button" class="btn btn-secondary w-100 mb-2" onclick="nextStep(2)">
+                            Back
+                        </button>
+                        <button type="button" class="btn btn-success w-100" onclick="nextStep('submit')">
+                            Complete Check‑In
+                        </button>
+
+                    </div>
+
+                </form>
+            </div>
+
         </div>
     </div>
 </div>
