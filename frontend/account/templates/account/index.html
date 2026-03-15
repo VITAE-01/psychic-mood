@@ -21,8 +21,8 @@
                             <li style="font-style: italic;"> Participation is voluntary. </li>
                             <li style="font-style: italic;"> You can withdraw at any time without any consequences. </li>
                             <li style="font-style: italic;"> Your data will be used solely for research purposes. </li>
-                            <li style="font-style: italic;"> We will <span style="font-weight: bold;"> NOT </span>  collect any personally identifiable information, and all data will be anonymized. </li>
-                            <li style="font-style: italic;"> We will ask you to share your behavioural beliefs and attitudes towards physical activity on a weekly basis. </li>
+                            <li style="font-style: italic;"> We will <span style="font-weight: bold;"> NOT </span>  collect any personally identifiable information. </li>
+                            <li style="font-style: italic;"> We will ask you to share your behavioural beliefs and attitudes towards physical activity daily. </li>
                             <li style="font-style: italic;"> We will ask about your physical activity when you use the app by reporting your daily activity levels. </li>
                             <li style="font-style: italic;"> We will also ask you to complete brief mood surveys after each activity session on a daily basis. </li>
                             <li style="font-style: italic;"> Optional demographic information will help us better understand the diverse perspectives of our participants. </li>
@@ -34,13 +34,25 @@
                         <p class="mb-1"> You voluntarily agree to participate in this study by providing self‑reports about behavioural belief, physical activity and mood. </p> 
                         <p class="mb-1"> Your participation is crucial for advancing our understanding of the research topic, and we appreciate your contribution to this important work.</p>
                         
-                        <div class="d-flex justify-content-center">
-                            <a href="{% url 'account:register' %}"
-                            class="btn btn-primary w-100 py-2 mt-2"
-                            style="border-radius: 10px;">
-                                Yes, I consent
-                            </a>
-                        </div>
+                        {% if not request.user.is_authenticated %}
+                            <div class="d-flex justify-content-center">
+                                <a href="{% url 'account:register' %}"
+                                class="btn btn-primary w-100 py-2 mt-2"
+                                style="border-radius: 10px;">
+                                    Yes, I consent
+                                </a>
+                            </div>
+                        {% endif %}
+
+                        {% if request.user.is_authenticated %}
+                            <div class="d-flex justify-content-center">
+                                <a href="{% url 'dashboard:index' %}"
+                                class="btn btn-primary w-100 py-2 mt-2"
+                                style="border-radius: 10px;">
+                                    View Dashboard
+                                </a>
+                            </div>
+                        {% endif %}
                     </div>
 
                 </div>
