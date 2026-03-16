@@ -33,6 +33,7 @@ def append_checkin_to_csv(checkin):
             "sport": checkin.sport,
             "others": checkin.others,
             "mood": checkin.mood,
+            "mood_score": checkin.mood_score,
             "created_at": timestamp
         }
 

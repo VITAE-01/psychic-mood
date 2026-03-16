@@ -26,6 +26,7 @@ class CheckIn(models.Model):
 
     # Mood
     mood = models.CharField(max_length=20)
+    mood_score = models.IntegerField(null=True, blank=True)
 
     # Timestamp
     created_at = models.DateTimeField(auto_now_add=True)
