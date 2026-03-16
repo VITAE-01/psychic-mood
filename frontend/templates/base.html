@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Psychic Mood</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<style>
+
+.page-title {
+    color: #0d6efd;
+    padding: 20px 0;
+    padding-left: 10px;
+    font-weight: 700;
+}
+
+body{
+background:#f8fafc;
+}
+
+form input:not([type="checkbox"]), form select{
+height:40px;
+width: 100%;
+border-radius:8px;
+padding-left: 12px;
+padding-right: 12px;
+}
+
+.btn-primary{
+background:#3B82F6;
+border:none;
+border-radius:10px;
+}
+
+a.text-primary {
+    text-decoration: none;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.checkin-progress-wrapper {
+    width: 100%;
+}
+
+.progress-step {
+    padding: 8px 16px;
+    border-radius: 8px;
+    background-color: #e9ecef;
+    color: #6c757d;
+    font-weight: 500;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    white-space: nowrap;
+}
+
+.progress-step.active {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.progress-line {
+    flex-grow: 1;
+    height: 3px;
+    background-color: #e9ecef;
+    transition: background-color 0.3s ease;
+}
+
+.progress-step.active + .progress-line {
+    background-color: #0d6efd;
+}
+
+/* Fade-in animation for steps */
+.step-content {
+    animation: fadeIn 0.35s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.mood-img {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.mood-item {
+    text-align: center;
+    cursor: pointer;
+}
+
+.mood-item:hover .mood-img {
+    transform: scale(1.10);
+}
+
+/* Selected state */
+.mood-item.selected .mood-img {
+    transform: scale(1.5);
+    box-shadow: 0 0 12px rgba(13, 110, 253, 0.45);
+}
+
+.mood-label {
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+
+</style>
+
+<body>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <a href="{% url 'landing-page' %}" class="text-primary">
+            <h1 class="page-title">Psychic Mood</h1>
+        </a>
+
+        {% if show_signup_button %}
+            <div class="d-flex align-items-center gap-3 me-3">
+                <a href="{% url 'account:login' %}">
+                    <button class="btn btn-primary" style="border-radius: 10px;">Sign In</button>
+                </a>
+            </div>
+        {% endif %}
+
+        {% if request.user.is_authenticated %}
+            <div class="d-flex align-items-center gap-3 me-3">
+
+                <span class="fw-bold">Hi {{ request.user.username }}</span>
+
+                    <a href="{% url 'account:logout' %}">
+                        <button class="btn btn-danger" style="border-radius: 10px;">Logout</button>
+                    </a>
+
+            </div>
+        {% endif %}
+    </div>
+
+
+{% block content %}
+{% endblock %}
+
+<script>
+function disableSubmitButton() {
+    const signup = document.getElementById("signupBtn");
+    const createPass = document.getElementById("createPassBtn");
+    const resetPass = document.getElementById("resetPassBtn");
+    const login = document.getElementById("loginBtn");
+
+    if (signup) {
+        signup.disabled = true;
+        signup.style.opacity = "0.6";
+        signup.style.cursor = "not-allowed";
+        signup.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Registering...`;
+    }
+
+    if (createPass) {
+        createPass.disabled = true;
+        createPass.style.opacity = "0.6";
+        createPass.style.cursor = "not-allowed";
+        createPass.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Creating...`;
+    }
+
+    if (resetPass) {
+        resetPass.disabled = true;
+        resetPass.style.opacity = "0.6";
+        resetPass.style.cursor = "not-allowed";
+        resetPass.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Resetting...`;
+    }
+
+    if (login) {
+        login.disabled = true;
+        login.style.opacity = "0.6";
+        login.style.cursor = "not-allowed";
+        login.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>logging...`;
+    }
+}
+</script>
+
+
+</body>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const numberFields = document.querySelectorAll('input[type="number"][min="0"]');
+
+        numberFields.forEach(field => {
+            field.addEventListener("input", function () {
+                if (this.value < 0) {
+                    this.value = 1;
+                }
+            });
+        });
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.querySelectorAll('.belief-field').forEach(select => {
+    select.addEventListener('change', function() {
+        const fieldName = this.getAttribute('name');
+        const errorDiv = document.getElementById('error-' + fieldName);
+
+        if (this.value.trim() !== "") {
+            errorDiv.innerText = "";
+        }
+    });
+});
+</script>
+
+<script>
+const performedActivity = document.getElementById('performed_activity');
+if (performedActivity) {
+
+document.getElementById('performed_activity').addEventListener('change', function() {
+    const value = this.value;
+    const details = document.getElementById('activity_details');
+    
+    // Clear the main error
+    document.getElementById('error-performed_activity').innerText = "";
+
+    if (value === "yes") {
+        details.style.display = "block";
+    } else {
+        details.style.display = "none";
+
+        // Clear all activity errors
+        document.querySelectorAll('.activity-field').forEach(field => {
+            field.value = "";
+        });
+    }
+});
+}
+</script>
+
+<script>
+document.querySelectorAll('.activity-field').forEach(field => {
+    field.addEventListener('change', function() {
+        // If at least one activity is selected, clear the error
+        const fields = ["walking", "running", "cycling", "gym", "sport", "others"];
+        let atLeastOne = fields.some(f => {
+            return document.querySelector(`[name="${f}"]`).value;
+        });
+
+        if (atLeastOne) {
+            document.getElementById('error-performed_activity').innerText = "";
+        }
+    });
+});
+</script>
+
+<script>
+function validatePhysicalActivity() {
+    let performed = document.querySelector('[name="performed_activity"]').value;
+
+    // Clear previous errors
+    document.getElementById('error-performed_activity').innerText = "";
+
+    // If user didn't choose Yes/No
+    if (!performed) {
+        document.getElementById('error-performed_activity').innerText = "Please select Yes or No.";
+        return false;
+    }
+
+    // If NO → skip validation
+    if (performed === "no") {
+        return true;
+    }
+
+    // If YES → require at least one activity
+    const fields = ["walking", "running", "cycling", "gym", "sport", "others"];
+    let atLeastOne = false;
+
+    // Check if at least one field has a value
+    fields.forEach(f => {
+        let value = document.querySelector(`[name="${f}"]`).value;
+        if (value) {
+            atLeastOne = true;
+        }
+    });
+
+    if (!atLeastOne) {
+        // Show a single combined error OR individual errors
+        document.getElementById('error-performed_activity').innerText = "Please select duration of at least one activity.";
+        return false;
+    }
+
+    return true;
+}
+</script>
+
+<script>
+document.querySelectorAll('.mood-item').forEach(item => {
+    item.addEventListener('click', function() {
+
+        // Clear previous selection
+        document.querySelectorAll('.mood-item').forEach(i => i.classList.remove('selected'));
+
+        // Mark this one as selected
+        this.classList.add('selected');
+
+        // Store value in hidden input
+        const value = this.getAttribute('data-value');
+        document.getElementById('mood_value').value = value;
+
+        // Clear error
+        document.getElementById('error-mood').innerText = "";
+    });
+});
+</script>
+
+<script>
+function nextStep(step) {
+
+    // Clear all errors
+    const fields = [
+        "perceived_benefits",
+        "self_efficacy",
+        "barrier_time",
+        "barrier_tired",
+        "barrier_others"
+    ];
+    fields.forEach(f => {
+        document.getElementById("error-" + f).innerText = "";
+    });
+
+    // STEP 1 VALIDATION
+    if (step === 2) {
+        let valid = true;
+
+        fields.forEach(f => {
+            let value = document.querySelector(`[name="${f}"]`).value;
+            if (!value) {
+                document.getElementById("error-" + f).innerText = "Please select an option.";
+                valid = false;
+            }
+        });
+
+        if (!valid) return;
+
+    }
+
+    // STEP 2 VALIDATION
+    if (step === 3) {
+        if (!validatePhysicalActivity()) return;
+    }
+
+    // STEP 3 VALIDATION (before submit)
+    if (step === 'submit') {
+        let mood = document.getElementById('mood_value').value;
+
+        if (!mood) {
+            document.getElementById('error-mood').innerText = "Please select a mood emoji.";
+            return;
+        }
+
+        // Disable the submit button to prevent double clicks
+        const btn = document.getElementById("completeCheckinBtn");
+        btn.disabled = true;
+        btn.style.opacity = "0.6";
+        btn.style.cursor = "not-allowed";
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Submitting...`;
+
+        // Disable the Back button
+        const backBtn = document.getElementById("isCompleteBackButton");
+        if (backBtn) {
+            backBtn.disabled = true;
+            backBtn.style.opacity = "0.5";
+            backBtn.style.cursor = "not-allowed";
+        }
+
+        const form = document.getElementById("checkinForm");
+
+        fetch(form.action, {
+            method: "POST",
+            body: new FormData(form),
+        })
+        .then(response => response.json())
+        .then(data => {
+
+            if (data.status === "blocked") {
+                // Show error inside modal
+                document.getElementById("error-mood").innerText = data.message;
+
+                // Re-enable buttons
+                btn.disabled = false;
+                btn.style.opacity = "1";
+                btn.innerText = "Complete Check‑In";
+
+                backBtn.disabled = false;
+                backBtn.style.opacity = "1";
+
+                return;
+            }
+
+            if (data.status === "ok") {
+                // Success → redirect normally
+                window.location.href = "/dashboard/";
+            }
+        });
+
+        return;
+    }
+
+    // Hide all steps
+    document.querySelectorAll('.step-content').forEach(div => {
+        div.style.display = 'none';
+    });
+
+    // Show selected step with fade animation
+    let activeStep = document.getElementById('step' + step);
+    activeStep.style.display = 'block';
+
+    // Update progress bar
+    document.getElementById('prog1').classList.remove('active');
+    document.getElementById('prog2').classList.remove('active');
+    document.getElementById('prog3').classList.remove('active');
+
+    document.getElementById('prog' + step).classList.add('active');
+}
+</script>
+
+</html>

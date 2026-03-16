@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8 col-12">
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold mt-4" style="color:#0d6efd;">Tag Along with Us! 👋</h2>
+                        <p class="text-muted">Fill your personal information to continue.</p>
+                    </div>
+                    
+                    <div class="card border-0 p-4">
+
+                        <form method="POST" onsubmit="disableSubmitButton()">
+                        {% csrf_token %}
+    
+                            <div class="row flex justify-center items-center">
+                                <!-- USERNAME -->
+                                <div class="col-12 mb-3">
+                                    <label class="form-label small text-muted">Username</label>
+                                    {{ form.username }}
+                                    <div class="text-danger small">{{ form.username.errors.0 }}</div>
+                                </div>
+                            </div>
+                        
+                            <div class="row flex justify-center items-center">
+                                <!-- GENDER -->
+                                <div class="col-md-6 col-12 mb-3">
+                                    <label class="form-label small text-muted">Gender</label>
+                                    {{ form.gender }}
+                                </div>
+
+                                <!-- AGE RANGE -->
+                                <div class="col-md-6 col-12 mb-3">
+                                    <label class="form-label small text-muted">Age Range</label>
+                                    {{ form.age_range }}
+                                    <div class="text-danger small">{{ form.age_range.errors }}</div>
+                                </div>
+                            </div>
+
+                            <div class="row flex justify-center items-center">
+                                <!-- HEIGHT -->
+                                <div class="col-md-6 col-12 mb-3">
+                                    <label class="form-label small text-muted">Height (cm)</label>
+                                    {{ form.height }}
+                                    <div class="text-danger small">{{ form.height.errors.0 }}</div>
+                                </div>
+
+                                <!-- WEIGHT -->
+                                <div class="col-md-6 col-12 mb-3">
+                                    <label class="form-label small text-muted">Weight (kg)</label>
+                                    {{ form.weight }}
+                                    <div class="text-danger small">{{ form.weight.errors.0 }}</div>
+                                </div>
+                            </div>
+
+                            <div class="row flex justify-center items-center">
+                            
+                                <!-- CONSENT -->
+                                <div class="form-check mb-4">
+                                    <input type="checkbox" name="consent" required class="form-check-input">
+                                    <label class="form-check-label small">
+                                        I agree to participate and allow my data to be used for research purposes.
+                                    </label>
+                                </div>
+
+                                <div class="d-flex justify-content-center">
+                                    <!-- SUBMIT BUTTON -->
+                                    <button type="submit" id="signupBtn" class="btn btn-primary w-50 py-2 justify-center" style="border-radius: 10px;">
+                                        Sign Up
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+
+                    <div class="text-center mt-2 mb-3">
+                        <span class="small text-muted">Already have an account?</span>
+                        <a href="{% url 'account:login' %}" class="small text-primary">Login here</a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
