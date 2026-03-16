@@ -1,18 +1,11 @@
 import csv
 import os
 import threading
-import hashlib
 from django.conf import settings
 from django.utils import timezone
 
 # Thread lock to make CSV writes safe
 csv_lock = threading.Lock()
-
-def anonymize_username(username):
-    """
-    Convert a username to a SHA-256 hash to anonymize it.
-    """
-    return hashlib.sha256(username.encode()).hexdigest()
 
 
 def write_active_user_to_csv(user):
@@ -23,7 +16,7 @@ def write_active_user_to_csv(user):
     if not user.is_active:
         return
 
-    file_path = os.path.join(settings.BASE_DIR, 'user_registrations.csv')
+    file_path = os.path.join(settings.BASE_DIR, 'active_users.csv')
 
     # Acquire lock before writing
     with csv_lock:
@@ -35,15 +28,15 @@ def write_active_user_to_csv(user):
             # Write header if file does not exist
             if not file_exists:
                 writer.writerow([
-                    'username', 'age_range', 'gender', 'height', 'weight',
-                    'is_active', 'registration_completed_at'
+                    'user_id', 'age_range', 'gender', 'height', 'weight',
+                    'is_active', 'registered_at'
                 ])
 
             # Human-readable timestamp
             timestamp = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
 
             writer.writerow([
-                anonymize_username(user.username),  # Anonymized
+                user.id,
                 user.age_range,
                 user.gender,
                 user.height,

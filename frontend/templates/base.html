@@ -149,6 +149,44 @@ input[type="number"] {
 {% block content %}
 {% endblock %}
 
+<script>
+function disableSubmitButton() {
+    const signup = document.getElementById("signupBtn");
+    const createPass = document.getElementById("createPassBtn");
+    const resetPass = document.getElementById("resetPassBtn");
+    const login = document.getElementById("loginBtn");
+
+    if (signup) {
+        signup.disabled = true;
+        signup.style.opacity = "0.6";
+        signup.style.cursor = "not-allowed";
+        signup.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Registering...`;
+    }
+
+    if (createPass) {
+        createPass.disabled = true;
+        createPass.style.opacity = "0.6";
+        createPass.style.cursor = "not-allowed";
+        createPass.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Creating...`;
+    }
+
+    if (resetPass) {
+        resetPass.disabled = true;
+        resetPass.style.opacity = "0.6";
+        resetPass.style.cursor = "not-allowed";
+        resetPass.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Resetting...`;
+    }
+
+    if (login) {
+        login.disabled = true;
+        login.style.opacity = "0.6";
+        login.style.cursor = "not-allowed";
+        login.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>logging...`;
+    }
+}
+</script>
+
+
 </body>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
