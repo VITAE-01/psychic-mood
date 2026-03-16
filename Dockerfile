@@ -1,6 +1,17 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
-WORKDIR /frontend
+ENV DEBIAN_FRONTEND=noninteractive
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    default-libmysqlclient-dev \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# create non-root user
+RUN useradd -m appuser
 
 COPY requirements.txt .
 
@@ -8,6 +19,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+WORKDIR /app/frontend
+
+USER appuser
+
 EXPOSE 8000
 
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "web.wsgi:application", "--bind", "0.0.0.0:8000"]
