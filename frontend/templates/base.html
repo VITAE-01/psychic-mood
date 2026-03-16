@@ -379,7 +379,36 @@ function nextStep(step) {
             backBtn.style.cursor = "not-allowed";
         }
 
-        document.getElementById("checkinForm").submit();
+        const form = document.getElementById("checkinForm");
+
+        fetch(form.action, {
+            method: "POST",
+            body: new FormData(form),
+        })
+        .then(response => response.json())
+        .then(data => {
+
+            if (data.status === "blocked") {
+                // Show error inside modal
+                document.getElementById("error-mood").innerText = data.message;
+
+                // Re-enable buttons
+                btn.disabled = false;
+                btn.style.opacity = "1";
+                btn.innerText = "Complete Check‑In";
+
+                backBtn.disabled = false;
+                backBtn.style.opacity = "1";
+
+                return;
+            }
+
+            if (data.status === "ok") {
+                // Success → redirect normally
+                window.location.href = "/dashboard/";
+            }
+        });
+
         return;
     }
 
