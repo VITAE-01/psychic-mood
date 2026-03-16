@@ -116,6 +116,7 @@ input[type="number"] {
 
 
 </style>
+
 <body>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -150,6 +151,7 @@ input[type="number"] {
 {% endblock %}
 
 </body>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const numberFields = document.querySelectorAll('input[type="number"][min="0"]');
@@ -179,6 +181,9 @@ document.querySelectorAll('.belief-field').forEach(select => {
 </script>
 
 <script>
+const performedActivity = document.getElementById('performed_activity');
+if (performedActivity) {
+
 document.getElementById('performed_activity').addEventListener('change', function() {
     const value = this.value;
     const details = document.getElementById('activity_details');
@@ -197,6 +202,7 @@ document.getElementById('performed_activity').addEventListener('change', functio
         });
     }
 });
+}
 </script>
 
 <script>
@@ -280,11 +286,11 @@ function nextStep(step) {
 
     // Clear all errors
     const fields = [
-        "belief_improve_mood",
-        "belief_confidence",
-        "belief_time",
-        "belief_tired",
-        "belief_responsibilities"
+        "perceived_benefits",
+        "self_efficacy",
+        "barrier_time",
+        "barrier_tired",
+        "barrier_others"
     ];
     fields.forEach(f => {
         document.getElementById("error-" + f).innerText = "";
@@ -319,6 +325,22 @@ function nextStep(step) {
             document.getElementById('error-mood').innerText = "Please select a mood emoji.";
             return;
         }
+
+        // Disable the submit button to prevent double clicks
+        const btn = document.getElementById("completeCheckinBtn");
+        btn.disabled = true;
+        btn.style.opacity = "0.6";
+        btn.style.cursor = "not-allowed";
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Submitting...`;
+
+        // Disable the Back button
+        const backBtn = document.getElementById("isCompleteBackButton");
+        if (backBtn) {
+            backBtn.disabled = true;
+            backBtn.style.opacity = "0.5";
+            backBtn.style.cursor = "not-allowed";
+        }
+
         document.getElementById("checkinForm").submit();
         return;
     }

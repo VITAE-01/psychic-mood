@@ -45,7 +45,7 @@
                 </div>
 
 
-                <form id="checkinForm" method="POST" action="{% url 'dashboard:activity_checkin' %}">
+                <form id="checkinForm" method="POST" action="{% url 'dashboard:submit_checkin' %}">
                     {% csrf_token %}
 
                     <!-- STEP 1: Behaviour Beliefs -->
@@ -55,7 +55,7 @@
                         <div class="mb-3">
 
                             <label class="form-label">I believe that physical activity will improve my mood</label>
-                            <select name="belief_improve_mood" class="form-select belief-field">
+                            <select name="perceived_benefits" class="form-select belief-field">
                                 <option value="">Select an option</option>
                                 <option value="1">Strongly disagree</option>
                                 <option value="2">Disagree</option>
@@ -63,10 +63,10 @@
                                 <option value="4">Agree</option>
                                 <option value="5">Strongly agree</option>
                             </select>
-                            <div class="text-danger small mt-1" id="error-belief_improve_mood"></div>
+                            <div class="text-danger small mt-1" id="error-perceived_benefits"></div>
 
                             <label class="form-label mt-3">I'm confident I can engage in physical activity when I intend to</label>
-                            <select name="belief_confidence" class="form-select belief-field">
+                            <select name="self_efficacy" class="form-select belief-field">
                                 <option value="">Select an option</option>
                                 <option value="1">Strongly disagree</option>
                                 <option value="2">Disagree</option>
@@ -74,10 +74,10 @@
                                 <option value="4">Agree</option>
                                 <option value="5">Strongly agree</option>
                             </select>
-                            <div class="text-danger small mt-1" id="error-belief_confidence"></div>
+                            <div class="text-danger small mt-1" id="error-self_efficacy"></div>
 
                             <label class="form-label mt-3">I did not have enough time to engage in physical activity</label>
-                            <select name="belief_time" class="form-select belief-field">
+                            <select name="barrier_time" class="form-select belief-field">
                                 <option value="">Select an option</option>
                                 <option value="1">Strongly disagree</option>
                                 <option value="2">Disagree</option>
@@ -85,10 +85,10 @@
                                 <option value="4">Agree</option>
                                 <option value="5">Strongly agree</option>
                             </select>
-                            <div class="text-danger small mt-1" id="error-belief_time"></div>
+                            <div class="text-danger small mt-1" id="error-barrier_time"></div>
 
                             <label class="form-label mt-3">I feel too tired to engage in physical activity</label>
-                            <select name="belief_tired" class="form-select belief-field">
+                            <select name="barrier_tired" class="form-select belief-field">
                                 <option value="">Select an option</option>
                                 <option value="1">Strongly disagree</option>
                                 <option value="2">Disagree</option>
@@ -96,10 +96,10 @@
                                 <option value="4">Agree</option>
                                 <option value="5">Strongly agree</option>
                             </select>
-                            <div class="text-danger small mt-1" id="error-belief_tired"></div>
+                            <div class="text-danger small mt-1" id="error-barrier_tired"></div>
 
                             <label class="form-label mt-3">Other responsibilities prevented me from being physically active</label>
-                            <select name="belief_responsibilities" class="form-select belief-field">
+                            <select name="barrier_others" class="form-select belief-field">
                                 <option value="">Select an option</option>
                                 <option value="1">Strongly disagree</option>
                                 <option value="2">Disagree</option>
@@ -107,7 +107,7 @@
                                 <option value="4">Agree</option>
                                 <option value="5">Strongly agree</option>
                             </select>
-                            <div class="text-danger small mt-1" id="error-belief_responsibilities"></div>
+                            <div class="text-danger small mt-1" id="error-barrier_others"></div>
 
                         </div>
 
@@ -236,10 +236,10 @@
                         </div>
 
 
-                        <button type="button" class="btn btn-secondary w-100 mb-2" onclick="nextStep(2)">
+                        <button id="isCompleteBackButton" type="button" class="btn btn-secondary w-100 mb-2" onclick="nextStep(2)">
                             Back
                         </button>
-                        <button type="button" class="btn btn-success w-100" onclick="nextStep('submit')">
+                        <button id="completeCheckinBtn" type="button" class="btn btn-success w-100" onclick="nextStep('submit')">
                             Complete Check‑In
                         </button>
 
