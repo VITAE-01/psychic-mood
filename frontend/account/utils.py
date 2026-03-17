@@ -16,7 +16,11 @@ def write_active_user_to_csv(user):
     if not user.is_active:
         return
 
-    file_path = os.path.join(settings.BASE_DIR, 'active_users.csv')
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    DATA_DIR = os.path.join(BASE_DIR, "data")
+    os.makedirs(DATA_DIR, exist_ok=True)
+
+    file_path = os.path.join(DATA_DIR, 'active_users.csv')
 
     # Acquire lock before writing
     with csv_lock:
