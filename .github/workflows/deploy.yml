@@ -27,6 +27,8 @@ jobs:
 
         cd psychic-mood
 
+        mkdir -p psychic_data
+
         git pull origin main
 
         docker-compose down

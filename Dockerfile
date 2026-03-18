@@ -22,7 +22,6 @@ COPY . .
 WORKDIR /app/frontend
 
 RUN mkdir -p /app/frontend/static
-RUN mkdir -p /app/data
 RUN chown -R appuser:appuser /app
 
 RUN python manage.py collectstatic --noinput
