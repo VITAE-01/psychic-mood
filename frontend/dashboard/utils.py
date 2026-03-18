@@ -8,8 +8,11 @@ from django.utils import timezone
 csv_lock = threading.Lock()
 
 def append_checkin_to_csv(checkin):
-    # Path to your CSV file (e.g., dashboard/data/checkins.csv)
-    file_path = os.path.join(settings.BASE_DIR, "activity_checkins.csv")
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    DATA_DIR = os.path.join(BASE_DIR, "data")
+    os.makedirs(DATA_DIR, exist_ok=True)
+
+    file_path = os.path.join(DATA_DIR, "activity_checkins.csv")
 
     with csv_lock:
         file_exists = os.path.isfile(file_path)
