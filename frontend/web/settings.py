@@ -32,6 +32,9 @@ raw_hosts = os.getenv("ALLOWED_HOSTS", "")
 ALLOWED_HOSTS = [host.strip() for host in raw_hosts.split(",") if host.strip()]
 LOGIN_URL = 'account:login'
 
+raw_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "")
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in raw_origins.split(",") if o.strip()]
+
 # Application definition
 
 INSTALLED_APPS = [
