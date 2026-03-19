@@ -23,11 +23,22 @@ jobs:
     - name: Deploy
       run: |
 
-        ssh -o StrictHostKeyChecking=no {{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << EOF
+
+        cd ~
+
+        if [ ! -d "psychic-mood" ]; then
+
+          git clone https://github.com/VITAE-01/psychic-mood.git
+
+          mkdir -p ~/psychic-mood/psychic_data
+        fi
 
         cd psychic-mood
 
-        mkdir -p psychic_data
+        cat <<EOT > .env
+        ${{ secrets.ENV_FILE }}
+        EOT
 
         git pull origin main
 
