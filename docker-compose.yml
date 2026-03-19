@@ -13,6 +13,8 @@ services:
       - "8000"
     env_file:
       - .env
+    networks:
+      - psychic
 
   nginx:
     image: nginx:latest
@@ -25,7 +27,13 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - web
+    networks:
+      - psychic
 
 volumes:
   static_volume: {}
   psychic_data: {}
+
+networks:
+  psychic:
+    driver: bridge
