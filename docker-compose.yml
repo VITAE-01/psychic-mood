@@ -7,7 +7,7 @@ services:
     container_name: mood_app
     restart: always
     volumes:
-      - static_volume:/static
+      - static_volume:/app/frontend/staticfiles
       - ./psychic_data:/app/frontend/data
     expose:
       - "8000"
@@ -26,5 +26,5 @@ services:
       - web
 
 volumes:
-  static_volume:
+  static_volume: {}
   psychic_data: {}
