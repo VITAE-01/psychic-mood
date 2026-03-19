@@ -1,0 +1,17 @@
+# Virtual environment
+env
+db.sqlite3
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Environmental variable
+.env
+
+# Local databases
+*.sqlite
+*.db
+
+# csv files
+*.csv
