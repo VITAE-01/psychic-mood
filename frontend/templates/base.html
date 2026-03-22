@@ -263,14 +263,18 @@ if (performedActivity) {
 document.getElementById('performed_activity').addEventListener('change', function() {
     const value = this.value;
     const details = document.getElementById('activity_details');
+    const moodLabel = document.getElementById("mood_label");
+
     
     // Clear the main error
     document.getElementById('error-performed_activity').innerText = "";
 
     if (value === "yes") {
         details.style.display = "block";
+        moodLabel.textContent = "Share the mood that reflects how you're feeling after physical activity";
     } else {
         details.style.display = "none";
+        moodLabel.textContent = "Share the mood that reflects how you're feeling right now";
 
         // Clear all activity errors
         document.querySelectorAll('.activity-field').forEach(field => {
