@@ -47,6 +47,8 @@ jobs:
 
         cd psychic-mood
 
+        git pull origin main
+
         cat <<EOT > .env
         ${{ secrets.ENV_FILE }}
         EOT
