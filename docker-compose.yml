@@ -3,7 +3,7 @@ version: "3.9"
 services:
 
   web:
-    image: ghcr.io/Hardarmyyy/mood-app:latest
+    image: ghcr.io/vitae-01/psychic-mood:latest
     container_name: mood_app
     restart: always
     volumes:
