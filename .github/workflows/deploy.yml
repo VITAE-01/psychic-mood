@@ -17,11 +17,15 @@ jobs:
     - name: Log in to GHCR
       run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
+    - name: Prepare GHCR namespace
+      id: prep
+      run: echo "namespace=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
     - name: Build Docker image
-      run: docker build -t ghcr.io/${{ github.repository_owner }}/mood-app:latest .
+      run: docker build -t ghcr.io/${{ steps.prep.outputs.namespace }}/{{ github.event.repository.name }}:latest .
 
     - name: Push Docker image
-      run: docker push ghcr.io/${{ github.repository_owner }}/mood-app:latest
+      run: docker push ghcr.io/${{ steps.prep.outputs.namespace }}/{{ github.event.repository.name }}:latest
 
     - name: Start SSH agent
       uses: webfactory/ssh-agent@v0.9.0
@@ -47,10 +51,10 @@ jobs:
         ${{ secrets.ENV_FILE }}
         EOT
 
-        sudo docker pull ghcr.io/${{ github.repository_owner }}/mood-app:latest
+        docker pull ghcr.io/${{ steps.prep.outputs.namespace }}/{{ github.event.repository.name }}:latest
 
-        sudo docker-compose stop web
-        sudo docker-compose rm -f web
-        sudo docker-compose up -d web
+        docker-compose stop web
+        docker-compose rm -f web
+        docker-compose up -d web
 
         EOF
