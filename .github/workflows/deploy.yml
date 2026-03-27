@@ -51,6 +51,8 @@ jobs:
         ${{ secrets.ENV_FILE }}
         EOT
 
+        echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+
         docker pull ghcr.io/${{ steps.prep.outputs.namespace }}/${{ github.event.repository.name }}:latest
 
         docker-compose stop web
