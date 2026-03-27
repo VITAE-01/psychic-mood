@@ -20,6 +20,28 @@ body{
 background:#f8fafc;
 }
 
+.not-found {
+    font-size: 4rem;
+    margin: 0;
+}
+
+.not-found-p {
+    margin: 15px 0 25px;
+    font-size: 1.2rem;
+}
+
+.go-home {
+    padding: 10px 20px;
+    background: #0057ff;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+}
+.go-home:hover {
+    background: #003fcc;
+} */
+
 form input:not([type="checkbox"]), form select{
 height:40px;
 width: 100%;
@@ -116,6 +138,15 @@ input[type="number"] {
     margin-top: 4px;
 }
 
+.research-footer {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 2rem;
+    margin-bottom: 20px;
+}
+
+
 
 </style>
 
@@ -192,6 +223,11 @@ function disableSubmitButton() {
 
 </body>
 
+<footer class="research-footer">
+    © This study is conducted as part of MSc Software Engineering research.
+</footer>
+
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const numberFields = document.querySelectorAll('input[type="number"][min="0"]');
@@ -227,14 +263,18 @@ if (performedActivity) {
 document.getElementById('performed_activity').addEventListener('change', function() {
     const value = this.value;
     const details = document.getElementById('activity_details');
+    const moodLabel = document.getElementById("mood_label");
+
     
     // Clear the main error
     document.getElementById('error-performed_activity').innerText = "";
 
     if (value === "yes") {
         details.style.display = "block";
+        moodLabel.textContent = "Share the mood that reflects how you're feeling after physical activity";
     } else {
         details.style.display = "none";
+        moodLabel.textContent = "Share the mood that reflects how you're feeling right now";
 
         // Clear all activity errors
         document.querySelectorAll('.activity-field').forEach(field => {
