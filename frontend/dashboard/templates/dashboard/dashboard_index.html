@@ -4,21 +4,43 @@
 
 <div class="container my-5">
     <div class="row justify-content-center">
-        <div class="col-lg-6 col-md-8 col-12">
+        <div class="col-md-8 col-12 d-flex justify-content-center">
 
-            <div class="card shadow-sm px-4 py-5">
-                <div class="card-body justify-center text-center">
-                    <h3 class="card-title mb-4">Dashboard Overview</h3>
-                    <p class="card-text">Here you can log daily activity.</p>
-                <div>
+            <div class="card-wrapper">
 
+                <div class="card shadow-sm px-4 py-5">
+                    <div class="card-body justify-center text-center">
+
+                        <h3 class="card-title mb-4">Dashboard Overview</h3>
+                        
+                        <div class="d-flex flex-nowrap justify-content-center w-100 my-4">
+                            {% for day in week_days %}
+                                <div class="
+                                    px-3 py-2 rounded border text-center day-box flex-grow-1 mx-1
+                                    {% if day.is_today %}
+                                        bg-primary text-white border-primary
+                                    {% else %}
+                                        bg-white text-dark text-muted border-secondary
+                                    {% endif %}
+                                ">
+                                    <div>{{ day.label }}</div>
+                                    <div class="small">{{ day.month }}</div>
+                                    <div class="fw-bold">{{ day.date }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div>
+                            <a href="#" class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#activityModal">
+                                Check-In activity info
+                            </a>
+                        </div>
+
+                    </div>
                 </div>
-                    <a href="#" class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#activityModal">
-                        Check-In activity info
-                    </a>
-                </div>
+
             </div>
-        
+
         </div>
     </div>
 </div>
