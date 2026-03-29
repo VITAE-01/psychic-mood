@@ -9,6 +9,13 @@ MOOD_MAP = {
     "energized": 5
 }
 
+def likert_round(value):
+    if value is None:
+        return None
+    decimal = value - int(value)
+    if decimal < 0.5:
+        return int(value)
+    return int(value) + 1
 
 class CheckInForm(forms.ModelForm):
     class Meta:
