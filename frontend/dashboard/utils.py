@@ -103,7 +103,7 @@ def get_daily_activity_summary(user, day):
     # Maximum achievable intensity per day to prevent outliers
     capped_total = min(raw_total, MAX_DAILY_INTENSITY)
 
-    activity_intensity_report = (capped_total / MAX_DAILY_INTENSITY) * 100 if MAX_DAILY_INTENSITY > 0 else 0
+    activity_intensity_report = round((capped_total / MAX_DAILY_INTENSITY) * 100, 2 )if MAX_DAILY_INTENSITY > 0 else 0
 
     return {
         "activity_breakdown": readable_breakdown,
