@@ -1,12 +1,13 @@
 import csv
 import os
+from django.utils.safestring import mark_safe
 from django.conf import settings
 import threading
 from django.utils import timezone
 from .models import CheckIn
 from datetime import date, timedelta
 from django.db.models import Avg, Sum
-from .forms import MOOD_MAP, likert_round
+from .forms import MOOD_MAP, map_intensity_to_duration, likert_round
 
 # Utility functions for date handling
 today = timezone.localdate()
@@ -69,17 +70,45 @@ def append_checkin_to_csv(checkin):
             writer.writerow(row)
 
 # Function to calculate the total activity intensity for a given user and day
-def get_daily_activity_intensity(user, day):
-    activity_aggregate = (
-        CheckIn.objects
-        .filter(user=user, created_at__date=day)
-        .aggregate(**{f: Sum(f) for f in ACTIVITY_FIELDS})
+def get_daily_activity_summary(user, day):
+    activity_aggregate = CheckIn.objects.filter(
+        user=user,
+        created_at__date=day
     )
 
-    raw_total = sum((activity_aggregate[f] or 0) for f in ACTIVITY_FIELDS)
+    # Initialise breakdown for each activity type
+    breakdown = {field: 0 for field in ACTIVITY_FIELDS}
 
-    # Maximum cap for achievable intensity per day
-    return min(raw_total, MAX_DAILY_INTENSITY)
+    # Sum intensities across multiple entries
+    for entry in activity_aggregate:
+        for field in ACTIVITY_FIELDS:
+            raw_value = getattr(entry, field, 0) or 0
+
+            try:
+                value = int(raw_value or 0)
+            except ValueError:
+                value = 0
+
+            breakdown[field] += value
+
+    # Map intensity to bucket duration interval for readability
+    readable_breakdown = {
+        field: map_intensity_to_duration(breakdown[field])
+        for field in ACTIVITY_FIELDS
+    }
+
+    # Total intensity for the day per day
+    raw_total = sum(breakdown.values())
+
+    # Maximum achievable intensity per day to prevent outliers
+    capped_total = min(raw_total, MAX_DAILY_INTENSITY)
+
+    activity_intensity_report = (capped_total / MAX_DAILY_INTENSITY) * 100 if MAX_DAILY_INTENSITY > 0 else 0
+
+    return {
+        "activity_breakdown": readable_breakdown,
+        "intensity_percent": activity_intensity_report
+    }
 
 # Function to calculate mood data for each day of the current week
 def calculate_week_days(user):
@@ -97,19 +126,19 @@ def calculate_week_days(user):
         rounded_score = likert_round(avg_score)
         mood_key = REVERSE_MOOD_MAP.get(rounded_score)
 
-        # Calculate total activity intensity for the day
-        daily_intensity_agg = get_daily_activity_intensity(user, day)
-        activity_intensity_report = (daily_intensity_agg / MAX_DAILY_INTENSITY) *100 if MAX_DAILY_INTENSITY > 0 else 0
+        # Calculate total activity summary and intensity for the day
+        activity_summary = get_daily_activity_summary(user, day)
 
         week_days.append({
             "label": day.strftime("%a"),
             "month": day.strftime("%b"),
+            "year": day.strftime("%Y"),
             "date": day.strftime("%d"),
             "is_today": (day == today),
             "mood": mood_key,
             "mood_score": rounded_score,
-            "activity_intensity": daily_intensity_agg,
-            "activity_intensity_report": activity_intensity_report,
+            "activity_breakdown": activity_summary["activity_breakdown"],
+            "activity_intensity_report": activity_summary["intensity_percent"],
         })
 
     return week_days
