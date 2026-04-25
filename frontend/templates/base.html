@@ -156,6 +156,66 @@ input[type="number"] {
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
 }
 
+.mood-card {
+    background-color: #e1eff5;
+    border-radius: 12px;
+}
+
+.weekly-bar-container {
+    height: 180px;
+}
+
+.activity-bar-wrapper {
+    height: 120px;
+    width: 30px;
+    background-color: #ffffff;
+    border-radius: 20px;
+    display: flex;
+    position: relative;
+    align-items: flex-end;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.activity-bar {
+    width: 100%;
+    border-radius: 20px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    transition: height 0.4s ease-in-out;
+    cursor: pointer;
+}
+
+.activity-bar:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+.mood-img-trend {
+    width: 22px;
+    height: 22px;
+    position: absolute;
+    top: -15px;
+    background: white;
+    border-radius: 50%;
+    padding: 2px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    cursor: pointer;
+}
+
+.mood-img-empty {
+    width: 22px;
+    height: 22px;
+    position: absolute;
+    bottom: 5px;
+    background: white;
+    border-radius: 50%;
+    padding: 2px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    cursor: pointer;
+}
+
 </style>
 
 <body>
