@@ -17,6 +17,25 @@ def likert_round(value):
         return int(value)
     return int(value) + 1
 
+ACTIVITY_DURATION_MAP = {
+    0: "No activity",
+    1: "0–15 mins",
+    2: "15–30 mins",
+    3: "30–45 mins",
+    4: "45 mins+"
+}
+
+def map_intensity_to_duration(total):
+    if total <= 0:
+        return "No activity"
+    if total == 1:
+        return "0–15 mins"
+    if total == 2:
+        return "15–30 mins"
+    if total == 3:
+        return "30–45 mins"
+    return "45 mins+"
+
 class CheckInForm(forms.ModelForm):
     class Meta:
         model = CheckIn

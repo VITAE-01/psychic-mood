@@ -1,0 +1,44 @@
+{% load static %}
+{% block content %}
+
+<!-- Day Detail Modal -->
+<div class="modal fade" id="dayDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailModalTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <!-- Mood Section -->
+                <div class="text-center mb-3">
+                    <img id="detailMoodIcon" src="" class="mood-img-large mb-2">
+                    <h6 id="detailMoodScore" class="fw-bold text-muted"></h6>
+                </div>
+
+                <hr>
+
+                <!-- Activity Section -->
+                <div>
+                    <h6 class="fw-bold">Activity Summary</h6>
+                    <p id="detailActivityBreakdown" class="mb-2"></p>
+                    <p class="mb-1">
+                        <span class="text-muted" style="font-style: italic;">Activity Intensity Score:</span>
+                        <span class="fw-bold" id="detailActivityIntensity"></span>
+                    </p>
+                    <p class="small text-muted">
+                        Intensity score is based on activity duration across each of the available activities.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
