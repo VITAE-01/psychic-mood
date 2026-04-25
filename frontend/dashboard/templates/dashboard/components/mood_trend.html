@@ -34,7 +34,16 @@
                                 bg-danger
                             {% endif %}
                         "
-                        style="height: {{ day.activity_intensity_report }}%;">
+                        style="height: {{ day.activity_intensity_report }}%;"
+                        data-bs-toggle="modal"
+                        data-bs-target="#dayDetailModal"
+                        data-day-label="{{ day.label }}"
+                        data-day-date="{{ day.date }} {{ day.month }}, {{ day.year }}"
+                        data-mood="{{ day.mood }}"
+                        data-mood-score="{{ day.mood_score }}"
+                        data-activity-breakdown="{{ day.activity_breakdown }}"
+                        data-activity-intensity="{{ day.activity_intensity_report }}"
+                        >
                             {% if day.mood %}
                                 <!-- Mood Icon INSIDE the activity bar -->
                                 <img src="{% static 'dashboard/images/' %}{{ day.mood }}.png"
@@ -45,7 +54,16 @@
                         {% if day.mood %}
                             <!-- Mood only (emoji floating in empty track) -->
                             <img src="{% static 'dashboard/images/' %}{{ day.mood }}.png"
-                                class="mood-img-empty">
+                                class="mood-img-empty"
+                                data-bs-toggle="modal"
+                                data-bs-target="#dayDetailModal"
+                                data-day-label="{{ day.label }}"
+                                data-day-date="{{ day.date }} {{ day.month }}, {{ day.year }}"
+                                data-mood="{{ day.mood }}"
+                                data-mood-score="{{ day.mood_score }}"
+                                data-activity-breakdown="{{ day.activity_breakdown }}"
+                                data-activity-intensity="{{ day.activity_intensity_report }}"
+                                >
                         {% endif %}
                     {% endif %}
                 </div>
@@ -60,9 +78,17 @@
 
     </div>
 
-    <p class="text-center text-muted small mt-3">
-        <!-- Tap any bar to view mood–activity details for that day. -->
-    </p>
+    {% if weekly_unique_days >= 1 %}
+        <p class="text-center text-muted small mt-3">
+            Tap any mood icon from the bar to view mood–activity details for that day.
+        </p>
+    {% else %}
+        <p class="text-center text-muted small mt-3">
+            No weekly check-ins available yet - Be kind to yourself and start today.
+        </p>
+    {% endif %}
 </div>
+
+{% include "dashboard/components/daily_reports.html" %}
 
 {% endblock %}

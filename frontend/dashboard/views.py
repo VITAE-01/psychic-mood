@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from .forms import CheckInForm
-from .utils import append_checkin_to_csv, calculate_week_days, get_streak_summary
+from .utils import append_checkin_to_csv, calculate_week_days, get_streak_summary, get_lifetime_weekly_checkin_count
 from .models import CheckIn
 from django.utils import timezone
 from datetime import date, timedelta
@@ -14,10 +14,12 @@ from datetime import date, timedelta
 def dashboard_index(request):
     week_days = calculate_week_days(user=request.user)
     summary = get_streak_summary(user=request.user)
+    lifetime_checkins_days, total_weekly_checkins, weekly_day_count, has_checked_in_today = get_lifetime_weekly_checkin_count(user=request.user)
 
     context = {
         "week_days": week_days,
         "streak": summary,
+        "weekly_unique_days": weekly_day_count,
     }
 
     return render(request, 'dashboard/dashboard_index.html', context)

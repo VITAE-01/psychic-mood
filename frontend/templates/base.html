@@ -540,4 +540,63 @@ function nextStep(step) {
 }
 </script>
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var modal = document.getElementById('dayDetailModal');
+
+    modal.addEventListener('show.bs.modal', function (event) {
+        var trigger = event.relatedTarget;
+
+        // Extract data attributes
+        var dayLabel = trigger.getAttribute('data-day-label'); 
+        var dayDate = trigger.getAttribute('data-day-date');
+        var mood = trigger.getAttribute('data-mood');
+        var moodScore = trigger.getAttribute('data-mood-score');
+        var activityBreakdown = trigger.getAttribute('data-activity-breakdown');
+        var activityIntensity = trigger.getAttribute('data-activity-intensity');
+
+        // Populate modal title
+        document.getElementById('detailModalTitle').textContent =
+            dayLabel + " — " + dayDate;
+
+        // Mood icon
+        var moodIcon = document.getElementById('detailMoodIcon');
+        moodIcon.src = "/static/dashboard/images/" + mood + ".png";
+
+        // Mood feedback
+        document.getElementById('detailMoodScore').textContent =
+            "Mood feedback — " + mood;
+        
+        // Activity intensity
+        document.getElementById('detailActivityIntensity').textContent =
+            activityIntensity + "%";
+
+        // Activity breakdown 
+        function pythonDictToJson(pyDictString) {
+            return pyDictString
+                .replace(/'/g, '"')
+                .replace(/None/g, '"None"')
+                .replace(/True/g, 'true') 
+                .replace(/False/g, 'false');
+        }
+        var raw = activityBreakdown;
+        
+        // Convert Python dict → JSON
+        var jsonString = pythonDictToJson(raw);
+        var breakdownData = JSON.parse(jsonString);
+        var breakdownText = Object.entries(breakdownData)
+        .map(([key, value]) => {
+            return `
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-capitalize">${key}</span>
+                    <span class="text-muted">${value}</span>
+                </div>
+            `;
+        })
+        .join("");
+
+        document.getElementById('detailActivityBreakdown').innerHTML = breakdownText;
+    });
+});
+</script>
 </html>
