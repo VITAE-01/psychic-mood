@@ -1,0 +1,68 @@
+{% load static %}
+{% block content %}
+
+<!-- Weekly Mood–Activity Relationship -->
+<div class="card shadow-sm mt-5 mood-card">
+
+    <div class="d-flex justify-content-between align-items-center">
+        <!-- Left: Mood Trend Analysis -->
+        <h6 class="card-title ps-3 pt-3 mb-0">
+            Weekly Mood Trend Analysis
+        </h6>
+        
+        <!-- Right: Date Filter -->
+        <!-- <div class="pe-3 pt-3">
+            <input type="date" class="form-control form-control-sm">
+        </div> -->
+    </div>
+
+    <div class="d-flex justify-content-between align-items-end weekly-bar-container">
+
+        {% for day in week_days %}
+        <div class="d-flex flex-column align-items-center mx-4">
+            
+                <!-- Activity Bar -->
+                <div class="activity-bar-wrapper d-flex align-items-end">
+                    {% if day.activity_intensity_report > 0 %}
+                        <div class="
+                            activity-bar d-flex justify-content-center align-items-start
+                            {% if day.mood == 'fulfilled' or day.mood == 'energized' %}
+                                bg-success
+                            {% elif day.mood == 'okay' %}
+                                bg-warning
+                            {% elif day.mood == 'low' or day.mood == 'stressed' %}
+                                bg-danger
+                            {% endif %}
+                        "
+                        style="height: {{ day.activity_intensity_report }}%;">
+                            {% if day.mood %}
+                                <!-- Mood Icon INSIDE the activity bar -->
+                                <img src="{% static 'dashboard/images/' %}{{ day.mood }}.png"
+                                    class="mood-img-trend ">
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        {% if day.mood %}
+                            <!-- Mood only (emoji floating in empty track) -->
+                            <img src="{% static 'dashboard/images/' %}{{ day.mood }}.png"
+                                class="mood-img-empty">
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <!-- Day Label -->
+                <div class="text-center mt-1 small fw-bold 
+                            {% if day.is_today %} text-primary {% else %} text-muted {% endif %}">
+                    {{ day.label }}
+                </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    <p class="text-center text-muted small mt-3">
+        <!-- Tap any bar to view mood–activity details for that day. -->
+    </p>
+</div>
+
+{% endblock %}

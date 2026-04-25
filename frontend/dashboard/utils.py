@@ -5,7 +5,7 @@ import threading
 from django.utils import timezone
 from .models import CheckIn
 from datetime import date, timedelta
-from django.db.models import Avg
+from django.db.models import Avg, Sum
 from .forms import MOOD_MAP, likert_round
 
 # Utility functions for date handling
@@ -13,11 +13,18 @@ today = timezone.localdate()
 start_of_week = today - timedelta(days=today.weekday() + 1 if today.weekday() < 6 else 0)
 end_of_week = start_of_week + timedelta(days=6)
 max_days = 7
+
+# Reverse mapping for mood scores to mood keys
 REVERSE_MOOD_MAP = {v: k for k, v in MOOD_MAP.items()}
+
+# Defined activity fields
+ACTIVITY_FIELDS = ["walking", "running", "cycling", "gym", "sport", "others"]
+MAX_DAILY_INTENSITY = 4 * len(ACTIVITY_FIELDS) 
 
 # Thread lock to make CSV writes safe
 csv_lock = threading.Lock()
 
+# Function to append check-in data to a CSV file
 def append_checkin_to_csv(checkin):
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     DATA_DIR = os.path.join(BASE_DIR, "data")
@@ -61,12 +68,27 @@ def append_checkin_to_csv(checkin):
 
             writer.writerow(row)
 
+# Function to calculate the total activity intensity for a given user and day
+def get_daily_activity_intensity(user, day):
+    activity_aggregate = (
+        CheckIn.objects
+        .filter(user=user, created_at__date=day)
+        .aggregate(**{f: Sum(f) for f in ACTIVITY_FIELDS})
+    )
+
+    raw_total = sum((activity_aggregate[f] or 0) for f in ACTIVITY_FIELDS)
+
+    # Maximum cap for achievable intensity per day
+    return min(raw_total, MAX_DAILY_INTENSITY)
+
+# Function to calculate mood data for each day of the current week
 def calculate_week_days(user):
     week_days = []
 
     for i in range(max_days):
         day = start_of_week + timedelta(days=i)
         
+        # Calculate average mood score for the day
         avg_score = (
             CheckIn.objects.filter(user=user, created_at__date=day)
             .aggregate(avg_score=Avg('mood_score'))['avg_score']
@@ -74,7 +96,11 @@ def calculate_week_days(user):
 
         rounded_score = likert_round(avg_score)
         mood_key = REVERSE_MOOD_MAP.get(rounded_score)
-        
+
+        # Calculate total activity intensity for the day
+        daily_intensity_agg = get_daily_activity_intensity(user, day)
+        activity_intensity_report = (daily_intensity_agg / MAX_DAILY_INTENSITY) *100 if MAX_DAILY_INTENSITY > 0 else 0
+
         week_days.append({
             "label": day.strftime("%a"),
             "month": day.strftime("%b"),
@@ -82,9 +108,13 @@ def calculate_week_days(user):
             "is_today": (day == today),
             "mood": mood_key,
             "mood_score": rounded_score,
+            "activity_intensity": daily_intensity_agg,
+            "activity_intensity_report": activity_intensity_report,
         })
+
     return week_days
 
+# Function to calculate the current streak of consecutive check-in days
 def calculate_streak(user, max_days=7):
     start_date = today - timedelta(days=max_days - 1)
 
@@ -108,6 +138,7 @@ def calculate_streak(user, max_days=7):
 
     return streak
 
+# Function to get lifetime and weekly check-in counts, and whether the user has checked in today
 def get_lifetime_weekly_checkin_count(user):
     # Lifetime unique check-in days
     lifetime_checkins_days = CheckIn.objects.filter(user=user).values('created_at__date').distinct().count()
@@ -132,6 +163,7 @@ def get_lifetime_weekly_checkin_count(user):
 
     return lifetime_checkins_days, total_weekly_checkins, weekly_day_count, has_checked_in_today
 
+# Function to generate a streak summary message based on the user's check-in history
 def get_streak_summary(user):
     streak = calculate_streak(user)
 
