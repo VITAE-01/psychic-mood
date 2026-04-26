@@ -5,6 +5,8 @@
     <title>Psychic Mood</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="{% static 'dashboard/images/favicon.png' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
 </head>
 
 <style>
@@ -183,7 +185,8 @@ input[type="number"] {
     position: relative;
     display: flex;
     justify-content: center;
-    transition: height 0.4s ease-in-out;
+    transition: height 450ms cubic-bezier(.2,.9,.3,1);
+    will-change: height;
     cursor: pointer;
 }
 
@@ -200,7 +203,6 @@ input[type="number"] {
     background: white;
     border-radius: 50%;
     padding: 2px;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
     cursor: pointer;
 }
 
@@ -212,8 +214,26 @@ input[type="number"] {
     background: white;
     border-radius: 50%;
     padding: 2px;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
     cursor: pointer;
+}
+
+.mood-img-trend, .mood-img-empty {
+    transition: transform 300ms ease, opacity 200ms ease;
+}
+
+.icon-xs {
+    font-size: 0.85rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+}
+
+.icon-bold {
+    font-size: 0.65rem;
+    line-height: 1;
+    text-shadow:
+        0 0 0.5px currentColor,
+        0 0 0.5px currentColor;
 }
 
 </style>
@@ -541,62 +561,260 @@ function nextStep(step) {
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    var modal = document.getElementById('dayDetailModal');
+    document.addEventListener('DOMContentLoaded', function () {
+        var modal = document.getElementById('dayDetailModal');
 
-    modal.addEventListener('show.bs.modal', function (event) {
-        var trigger = event.relatedTarget;
+        modal.addEventListener('show.bs.modal', function (event) {
+            var trigger = event.relatedTarget;
 
-        // Extract data attributes
-        var dayLabel = trigger.getAttribute('data-day-label'); 
-        var dayDate = trigger.getAttribute('data-day-date');
-        var mood = trigger.getAttribute('data-mood');
-        var moodScore = trigger.getAttribute('data-mood-score');
-        var activityBreakdown = trigger.getAttribute('data-activity-breakdown');
-        var activityIntensity = trigger.getAttribute('data-activity-intensity');
+            // Extract data attributes
+            var dayLabel = trigger.getAttribute('data-day-label'); 
+            var dayDate = trigger.getAttribute('data-day-date');
+            var mood = trigger.getAttribute('data-mood');
+            var moodScore = trigger.getAttribute('data-mood-score');
+            var activityBreakdown = trigger.getAttribute('data-activity-breakdown');
+            var activityIntensity = trigger.getAttribute('data-activity-intensity');
 
-        // Populate modal title
-        document.getElementById('detailModalTitle').textContent =
-            dayLabel + " — " + dayDate;
+            // Populate modal title
+            document.getElementById('detailModalTitle').textContent =
+                dayLabel + " — " + dayDate;
 
-        // Mood icon
-        var moodIcon = document.getElementById('detailMoodIcon');
-        moodIcon.src = "/static/dashboard/images/" + mood + ".png";
+            // Mood icon
+            var moodIcon = document.getElementById('detailMoodIcon');
+            moodIcon.src = "/static/dashboard/images/" + mood + ".png";
 
-        // Mood feedback
-        document.getElementById('detailMoodScore').textContent =
-            "Mood feedback — " + mood;
-        
-        // Activity intensity
-        document.getElementById('detailActivityIntensity').textContent =
-            activityIntensity + "%";
+            // Mood feedback
+            document.getElementById('detailMoodScore').textContent =
+                "Mood feedback — " + mood;
+            
+            // Activity intensity
+            document.getElementById('detailActivityIntensity').textContent =
+                activityIntensity + "%";
 
-        // Activity breakdown 
-        function pythonDictToJson(pyDictString) {
-            return pyDictString
-                .replace(/'/g, '"')
-                .replace(/None/g, '"None"')
-                .replace(/True/g, 'true') 
-                .replace(/False/g, 'false');
-        }
-        var raw = activityBreakdown;
-        
-        // Convert Python dict → JSON
-        var jsonString = pythonDictToJson(raw);
-        var breakdownData = JSON.parse(jsonString);
-        var breakdownText = Object.entries(breakdownData)
-        .map(([key, value]) => {
-            return `
-                <div class="d-flex justify-content-between mb-1">
-                    <span class="text-capitalize">${key}</span>
-                    <span class="text-muted">${value}</span>
-                </div>
-            `;
-        })
-        .join("");
+            // Activity breakdown 
+            function pythonDictToJson(pyDictString) {
+                return pyDictString
+                    .replace(/'/g, '"')
+                    .replace(/None/g, '"None"')
+                    .replace(/True/g, 'true') 
+                    .replace(/False/g, 'false');
+            }
+            var raw = activityBreakdown;
+            
+            // Convert Python dict → JSON
+            var jsonString = pythonDictToJson(raw);
+            var breakdownData = JSON.parse(jsonString);
+            var breakdownText = Object.entries(breakdownData)
+            .map(([key, value]) => {
+                return `
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-capitalize">${key}</span>
+                        <span class="text-muted">${value}</span>
+                    </div>
+                `;
+            })
+            .join("");
 
-        document.getElementById('detailActivityBreakdown').innerHTML = breakdownText;
+            document.getElementById('detailActivityBreakdown').innerHTML = breakdownText;
+        });
     });
-});
 </script>
+
+<script>
+    function escapeHtml(s) {
+        return String(s === null || s === undefined ? "" : s)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function renderWeeklyUI(weekDays) {
+        const container = document.querySelector(".weekly-bar-container");
+        if (!container) {
+            return;
+        }
+
+        const slots = Array.from(container.children).slice(0, 7);
+
+        if (slots.length === 0) {
+            return;
+        }
+
+        weekDays.forEach((day, i) => {
+            const slot = slots[i];
+            if (!slot) {
+                return;
+            }
+
+            const mood = day.mood ? escapeHtml(day.mood) : "";
+            const moodImgTag = mood
+                ? `<img src="/static/dashboard/images/${mood}.png" class="${day.activity_intensity_report > 0 ? 'mood-img-trend' : 'mood-img-empty'}" 
+                        data-bs-toggle="modal" data-bs-target="#dayDetailModal"
+                        data-day-label="${escapeHtml(day.label)}"
+                        data-day-date="${escapeHtml(day.date)} ${escapeHtml(day.month)}, ${escapeHtml(day.year)}"
+                        data-mood="${escapeHtml(day.mood)}"
+                        data-mood-score="${escapeHtml(day.mood_score)}"
+                        data-activity-breakdown='${escapeHtml(JSON.stringify(day.activity_breakdown || {}))}'
+                        data-activity-intensity="${escapeHtml(day.activity_intensity_report)}"
+                    />`
+                : "";
+
+            let colorClass = "";
+            if (day.mood === "fulfilled" || day.mood === "energized") colorClass = "bg-success";
+            else if (day.mood === "okay") colorClass = "bg-warning";
+            else if (day.mood === "low" || day.mood === "stressed") colorClass = "bg-danger";
+
+            let activityBarHtml = "";
+            const targetHeight = Number(day.activity_intensity_report) || 0;
+            if (targetHeight > 0) {
+                activityBarHtml = `
+                    <div class="activity-bar d-flex justify-content-center align-items-start ${colorClass}"
+                        style="height: 0%;" 
+                        data-target-height="${targetHeight}"
+                        data-bs-toggle="modal"
+                        data-bs-target="#dayDetailModal"
+                        data-day-label="${escapeHtml(day.label)}"
+                        data-day-date="${escapeHtml(day.date)} ${escapeHtml(day.month)}, ${escapeHtml(day.year)}"
+                        data-mood="${escapeHtml(day.mood)}"
+                        data-mood-score="${escapeHtml(day.mood_score)}"
+                        data-activity-breakdown='${escapeHtml(JSON.stringify(day.activity_breakdown || {}))}'
+                        data-activity-intensity="${escapeHtml(day.activity_intensity_report)}"
+                    >
+                        ${moodImgTag}
+                    </div>
+                `;
+            } else {
+                activityBarHtml = `
+                    <div class="activity-bar d-flex justify-content-center align-items-start" style="height: 0%;">
+                        <!-- empty track -->
+                    </div>
+                    ${moodImgTag}
+                `;
+            }
+
+            const labelClass = day.is_today ? "text-center mt-1 small fw-bold text-primary" : "text-center mt-1 small fw-bold text-muted";
+            const labelHtml = `<div class="${labelClass}">${escapeHtml(day.label)}</div>`;
+
+            // Compose final slot inner HTML (keeps the same outer wrapper classes)
+            const slotInner = `
+                <div class="activity-bar-wrapper d-flex align-items-end">
+                    ${activityBarHtml}
+                </div>
+                ${labelHtml}
+            `;
+
+            slot.innerHTML = slotInner;
+
+            const insertedBar = slot.querySelector(".activity-bar[data-target-height]");
+            if (insertedBar) {
+                requestAnimationFrame(() => {
+                    // small delay to be extra-safe across browsers
+                    setTimeout(() => {
+                        const target = insertedBar.getAttribute("data-target-height");
+                        insertedBar.style.height = `${target}%`;
+                    }, 10);
+                });
+            }
+        });
+    }
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const nav = document.getElementById("weekNav");
+        const firstCheckinStr = nav.dataset.firstCheckin;
+        const todayStr = nav.dataset.today;
+
+        function parseLocalDate(iso) {
+            if (!iso) return null;
+            const [y, m, d] = iso.split("-").map(Number);
+            return new Date(y, m - 1, d);
+        }
+
+        const today = parseLocalDate(todayStr);
+        const firstCheckin = parseLocalDate(firstCheckinStr);
+
+        function getSundayStart(date) {
+            const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            const day = d.getDay();
+            if (day === 0) {
+                return new Date(d);
+            }
+            const diff = day;
+            const sunday = new Date(d);
+            sunday.setDate(d.getDate() - diff);
+            return sunday;
+        }
+
+        // Initial week start
+        let currentWeekStart = getSundayStart(today);
+
+        function updateWeekLabel() {
+            const weekEnd = new Date(currentWeekStart);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+
+            const options = { month: "short", day: "numeric" };
+            const label = `${currentWeekStart.toLocaleDateString("en-GB", options)} – ${weekEnd.toLocaleDateString("en-GB", options)}`;
+
+            document.getElementById("weekLabel").textContent = label;
+        }
+
+        function updateButtons() {
+            const nextWeekStart = new Date(currentWeekStart);
+            nextWeekStart.setDate(nextWeekStart.getDate() + 7);
+
+            const prevWeekStart = new Date(currentWeekStart);
+            prevWeekStart.setDate(prevWeekStart.getDate() - 7);
+
+            const prevWeekEnd = new Date(prevWeekStart);
+            prevWeekEnd.setDate(prevWeekStart.getDate() + 6);
+
+            const nextDisabled = nextWeekStart > today;
+            const prevDisabled = prevWeekEnd < firstCheckin;
+
+            document.getElementById("nextWeek").disabled = nextDisabled;
+            document.getElementById("prevWeek").disabled = prevDisabled;
+        }
+
+        function loadWeekData() {
+            const isoDate = currentWeekStart.getFullYear() + "-" +
+                    String(currentWeekStart.getMonth() + 1).padStart(2, "0") + "-" +
+                    String(currentWeekStart.getDate()).padStart(2, "0");
+
+                fetch(`/dashboard/week-data/?start=${isoDate}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        renderWeeklyUI(data.week_days)
+                    })
+                    .catch(err => {
+                        console.error("DEBUG → Fetch error:", err);
+                    });
+        }
+
+        updateWeekLabel();
+        updateButtons();
+        loadWeekData();
+
+        // Handle Prev Week
+        document.getElementById("prevWeek").addEventListener("click", function () {
+            currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+            updateWeekLabel();
+            updateButtons();
+            loadWeekData();
+        });
+
+        // Handle Next Week
+        document.getElementById("nextWeek").addEventListener("click", function () {
+            currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+            updateWeekLabel();
+            updateButtons();
+            loadWeekData();
+        });
+
+    });
+</script>
+
 </html>
