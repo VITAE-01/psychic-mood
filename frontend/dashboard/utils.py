@@ -10,10 +10,12 @@ from django.db.models import Avg, Sum
 from .forms import MOOD_MAP, map_intensity_to_duration, likert_round
 
 # Utility functions for date handling
-today = timezone.localdate()
-start_of_week = today - timedelta(days=today.weekday() + 1 if today.weekday() < 6 else 0)
-end_of_week = start_of_week + timedelta(days=6)
-max_days = 7
+def get_week_range():
+    today = timezone.localdate()
+    start_of_week = today - timedelta(days=today.weekday() + 1 if today.weekday() < 6 else 0)
+    end_of_week = start_of_week + timedelta(days=6)
+    max_days = 7
+    return today, start_of_week, end_of_week, max_days
 
 # Reverse mapping for mood scores to mood keys
 REVERSE_MOOD_MAP = {v: k for k, v in MOOD_MAP.items()}
@@ -112,6 +114,7 @@ def get_daily_activity_summary(user, day):
 
 # Function to calculate mood data for each day of the current week
 def calculate_week_days(user):
+    today, start_of_week, end_of_week, max_days = get_week_range()
     week_days = []
 
     for i in range(max_days):
@@ -145,6 +148,7 @@ def calculate_week_days(user):
 
 # Function to calculate the current streak of consecutive check-in days
 def calculate_streak(user, max_days=7):
+    today, start_of_week, end_of_week, max_days = get_week_range()
     start_date = today - timedelta(days=max_days - 1)
 
     # Fetch all check-ins in one go
@@ -169,6 +173,7 @@ def calculate_streak(user, max_days=7):
 
 # Function to get lifetime and weekly check-in counts, and whether the user has checked in today
 def get_lifetime_weekly_checkin_count(user):
+    today, start_of_week, end_of_week, max_days = get_week_range()
     # Lifetime unique check-in days
     lifetime_checkins_days = CheckIn.objects.filter(user=user).values('created_at__date').distinct().count()
 
