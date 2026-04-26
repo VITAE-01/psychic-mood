@@ -6,7 +6,7 @@ from .forms import CheckInForm
 from .utils import append_checkin_to_csv, calculate_week_days, get_streak_summary, get_lifetime_weekly_checkin_count
 from .models import CheckIn
 from django.utils import timezone
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 
 @login_required
@@ -14,12 +14,14 @@ from datetime import date, timedelta
 def dashboard_index(request):
     week_days = calculate_week_days(user=request.user)
     summary = get_streak_summary(user=request.user)
-    lifetime_checkins_days, total_weekly_checkins, weekly_day_count, has_checked_in_today = get_lifetime_weekly_checkin_count(user=request.user)
+    lifetime_checkins_days, first_checkin_date, total_weekly_checkins, weekly_day_count, has_checked_in_today = get_lifetime_weekly_checkin_count(user=request.user)
 
     context = {
         "week_days": week_days,
         "streak": summary,
         "weekly_unique_days": weekly_day_count,
+        "first_checkin_date": first_checkin_date,
+        "today": timezone.localdate()
     }
 
     return render(request, 'dashboard/dashboard_index.html', context)
@@ -57,3 +59,19 @@ def submit_checkin(request):
             return JsonResponse({"status": "ok"})
 
     return JsonResponse({"status": "error"})
+
+def week_data(request):
+    user = request.user
+    start = request.GET.get("start")
+
+    if start:
+        try:
+            start_date = datetime.strptime(start, "%Y-%m-%d").date()
+        except ValueError:
+            return JsonResponse({"error": "Invalid date"}, status=400)
+    else:
+        start_date = None
+
+    week_days = calculate_week_days(user, start_date)
+
+    return JsonResponse({"week_days": week_days})
