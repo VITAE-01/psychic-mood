@@ -20,10 +20,11 @@ def dashboard_index(request):
         "week_days": week_days,
         "streak": summary,
         "weekly_unique_days": weekly_day_count,
+        "has_checked_in_today": has_checked_in_today,
         "first_checkin_date": first_checkin_date,
         "today": timezone.localdate()
     }
-
+    print(f"User has checked in {has_checked_in_today} number of times today")
     return render(request, 'dashboard/dashboard_index.html', context)
 
 def submit_checkin(request):
