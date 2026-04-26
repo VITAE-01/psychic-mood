@@ -1,20 +1,23 @@
 import csv
 import os
-from django.utils.safestring import mark_safe
-from django.conf import settings
 import threading
 from django.utils import timezone
 from .models import CheckIn
-from datetime import date, timedelta
-from django.db.models import Avg, Sum
+from datetime import datetime, timedelta
+from django.db.models import Avg
 from .forms import MOOD_MAP, map_intensity_to_duration, likert_round
 
 # Utility functions for date handling
-def get_week_range():
+def get_week_range(reference_date=None):
+    if reference_date is None:
+        reference_date = timezone.localdate()
+
     today = timezone.localdate()
-    start_of_week = today - timedelta(days=today.weekday() + 1 if today.weekday() < 6 else 0)
-    end_of_week = start_of_week + timedelta(days=6)
     max_days = 7
+    days_since_sunday = (reference_date.weekday() + 1) % max_days
+    start_of_week = reference_date - timedelta(days=days_since_sunday)
+    end_of_week = start_of_week + timedelta(days=6)
+
     return today, start_of_week, end_of_week, max_days
 
 # Reverse mapping for mood scores to mood keys
@@ -113,8 +116,8 @@ def get_daily_activity_summary(user, day):
     }
 
 # Function to calculate mood data for each day of the current week
-def calculate_week_days(user):
-    today, start_of_week, end_of_week, max_days = get_week_range()
+def calculate_week_days(user, start_date=None):
+    today, start_of_week, end_of_week, max_days = get_week_range(start_date)
     week_days = []
 
     for i in range(max_days):
@@ -137,6 +140,7 @@ def calculate_week_days(user):
             "month": day.strftime("%b"),
             "year": day.strftime("%Y"),
             "date": day.strftime("%d"),
+            "iso_date": day.isoformat(),
             "is_today": (day == today),
             "mood": mood_key,
             "mood_score": rounded_score,
@@ -177,6 +181,13 @@ def get_lifetime_weekly_checkin_count(user):
     # Lifetime unique check-in days
     lifetime_checkins_days = CheckIn.objects.filter(user=user).values('created_at__date').distinct().count()
 
+    # First checkin from user
+    first_checkin = CheckIn.objects.filter(user=user).order_by("created_at").first()
+    if first_checkin:
+        first_checkin_date = first_checkin.created_at.date()
+    else:
+        first_checkin_date = timezone.localdate()
+
     # Weekly check-ins this week
     total_weekly_checkins = CheckIn.objects.filter(
                         user=user,
@@ -195,13 +206,13 @@ def get_lifetime_weekly_checkin_count(user):
         created_at__date=today
     ).exists()
 
-    return lifetime_checkins_days, total_weekly_checkins, weekly_day_count, has_checked_in_today
+    return lifetime_checkins_days, first_checkin_date, total_weekly_checkins, weekly_day_count, has_checked_in_today
 
 # Function to generate a streak summary message based on the user's check-in history
 def get_streak_summary(user):
     streak = calculate_streak(user)
 
-    lifetime_checkins_days, total_weekly_checkins, weekly_day_count, has_checked_in_today = get_lifetime_weekly_checkin_count(user)
+    lifetime_checkins_days, first_checkin_date, total_weekly_checkins, weekly_day_count, has_checked_in_today = get_lifetime_weekly_checkin_count(user)
 
     # First-ever check-in for new users
     if lifetime_checkins_days == 1 and has_checked_in_today:
