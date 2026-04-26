@@ -14,8 +14,11 @@
 
                 <div class="checkin-progress-wrapper mb-4">
                     <div class="checkin-progress d-flex justify-content-center align-items-center gap-2">
-                        <div id="prog1" class="progress-step active">Add beliefs</div>
-                        <div class="progress-line"></div>
+                        <div id="prog1" class="progress-step active"
+                            {% if has_checked_in_today %}style="display:none"{% endif %}
+                            >
+                            Add beliefs</div>
+                        <div class="progress-line" {% if has_checked_in_today %}style="display:none"{% endif %}></div>
                         <div id="prog2" class="progress-step">Add activities</div>
                         <div class="progress-line"></div>
                         <div id="prog3" class="progress-step">Add mood</div>
@@ -27,6 +30,7 @@
                     {% csrf_token %}
 
                     <!-- STEP 1: Behaviour Beliefs -->
+                    {% if not has_checked_in_today %}
                     <div id="step1" class="step-content">
                         <h5 class="mb-3">Behavioural Beliefs</h5>
 
@@ -93,6 +97,7 @@
                             Next
                         </button>
                     </div>
+                    {% endif %}
 
                     <!-- STEP 2: Physical Activity -->
                     <div id="step2" class="step-content" style="display:none;">
@@ -163,10 +168,11 @@
                                 </select>
                             </div>
                         </div>
-
+                        {% if not has_checked_in_today %}
                         <button type="button" class="btn btn-secondary w-100 mb-2" onclick="nextStep(1)">
                             Back
                         </button>
+                        {% endif %}
                         <button type="button" class="btn btn-primary w-100" onclick="nextStep(3)">
                             Next
                         </button>

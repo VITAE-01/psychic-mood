@@ -450,6 +450,15 @@ document.querySelectorAll('.mood-item').forEach(item => {
 </script>
 
 <script>
+        document.addEventListener("DOMContentLoaded", () => {
+        if (HAS_CHECKED_IN_TODAY) {
+            nextStep(2);
+        }
+    });
+    const HAS_CHECKED_IN_TODAY = "{{ has_checked_in_today|yesno:'true,false' }}" === "true";
+</script>
+
+<script>
 function nextStep(step) {
 
     // Clear all errors
@@ -460,24 +469,24 @@ function nextStep(step) {
         "barrier_tired",
         "barrier_others"
     ];
-    fields.forEach(f => {
-        document.getElementById("error-" + f).innerText = "";
-    });
 
-    // STEP 1 VALIDATION
+    // STEP 1 VALIDATION (skip if user already checked in today)
     if (step === 2) {
-        let valid = true;
+        if (HAS_CHECKED_IN_TODAY) {
 
-        fields.forEach(f => {
-            let value = document.querySelector(`[name="${f}"]`).value;
-            if (!value) {
-                document.getElementById("error-" + f).innerText = "Please select an option.";
-                valid = false;
-            }
-        });
+        } else {
+            let valid = true;
 
-        if (!valid) return;
+            fields.forEach(f => {
+                let value = document.querySelector(`[name="${f}"]`)?.value;
+                if (!value) {
+                    document.getElementById("error-" + f).innerText = "Please select an option.";
+                    valid = false;
+                }
+            });
 
+            if (!valid) return;
+        }
     }
 
     // STEP 2 VALIDATION
