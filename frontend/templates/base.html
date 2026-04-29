@@ -580,10 +580,9 @@ function nextStep(step) {
             var dayLabel = trigger.getAttribute('data-day-label'); 
             var dayDate = trigger.getAttribute('data-day-date');
             var mood = trigger.getAttribute('data-mood');
-            var moodScore = trigger.getAttribute('data-mood-score');
+            var belief = trigger.getAttribute('data-hbm-summary');
             var activityBreakdown = trigger.getAttribute('data-activity-breakdown');
             var activityIntensity = trigger.getAttribute('data-activity-intensity');
-
             // Populate modal title
             document.getElementById('detailModalTitle').textContent =
                 dayLabel + " — " + dayDate;
@@ -595,6 +594,9 @@ function nextStep(step) {
             // Mood feedback
             document.getElementById('detailMoodScore').textContent =
                 "Mood feedback — " + mood;
+
+            // Belief feedback
+            document.getElementById('detailBelief').textContent = belief;
             
             // Activity intensity
             document.getElementById('detailActivityIntensity').textContent =
@@ -665,6 +667,7 @@ function nextStep(step) {
                         data-day-date="${escapeHtml(day.date)} ${escapeHtml(day.month)}, ${escapeHtml(day.year)}"
                         data-mood="${escapeHtml(day.mood)}"
                         data-mood-score="${escapeHtml(day.mood_score)}"
+                        data-hbm-summary="${escapeHtml(day.daily_hbm_summary)}"
                         data-activity-breakdown='${escapeHtml(JSON.stringify(day.activity_breakdown || {}))}'
                         data-activity-intensity="${escapeHtml(day.activity_intensity_report)}"
                     />`
@@ -688,6 +691,7 @@ function nextStep(step) {
                         data-day-date="${escapeHtml(day.date)} ${escapeHtml(day.month)}, ${escapeHtml(day.year)}"
                         data-mood="${escapeHtml(day.mood)}"
                         data-mood-score="${escapeHtml(day.mood_score)}"
+                        data-hbm-summary="${escapeHtml(day.daily_hbm_summary)}"
                         data-activity-breakdown='${escapeHtml(JSON.stringify(day.activity_breakdown || {}))}'
                         data-activity-intensity="${escapeHtml(day.activity_intensity_report)}"
                     >
@@ -805,7 +809,6 @@ function nextStep(step) {
 
         updateWeekLabel();
         updateButtons();
-        loadWeekData();
 
         // Handle Prev Week
         document.getElementById("prevWeek").addEventListener("click", function () {

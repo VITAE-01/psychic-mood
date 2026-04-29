@@ -36,6 +36,49 @@ def map_intensity_to_duration(total):
         return "30–45 mins"
     return "45 mins+"
 
+HBM_INTERPRETATION = {
+    "strong_negative": {
+        "activity": "You were active despite strong perceived barriers to being active.",
+        "no_activity": "Strong perceived barriers likely prevented you from being active."
+    },
+
+    "weak_negative": {
+        "activity": "You were active even though some perceived barriers were present.",
+        "no_activity": "Some perceived barriers may have prevented you from being active."
+    },
+
+    "neutral": {
+        "activity": "Your beliefs about activity were fairly balanced between benefits, barriers, and confidence.",
+        "no_activity": "Your beliefs about activity were fairly balanced between benefits, barriers, and confidence."
+    },
+
+    "weak_positive_pb": {
+        "activity": "You were active while recognizing some benefits of being active.",
+        "no_activity": "Your beliefs leaned slightly toward the benefits of being active."
+    },
+
+    "weak_positive_se": {
+        "activity": "You were active with some confidence in your ability to be active.",
+        "no_activity": "Your beliefs leaned slightly toward confidence in being active."
+    },
+
+    "strong_positive_pb": {
+        "activity": "You were active with a strong belief in the benefits of being active.",
+        "no_activity": "Your beliefs strongly emphasized the benefits of being active."
+    },
+
+    "strong_positive_se": {
+        "activity": "You were active with strong confidence in your ability to be active.",
+        "no_activity": "Your beliefs strongly emphasized confidence in being active."
+    },
+    
+    "no_data": {
+        "activity": "Belief insights will appear once you’ve logged a few days of activity and beliefs.",
+        "no_activity": "Belief insights will appear once you’ve logged a few days of activity and beliefs."
+    },
+}
+
+
 class CheckInForm(forms.ModelForm):
     class Meta:
         model = CheckIn
