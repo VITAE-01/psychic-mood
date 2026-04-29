@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from .forms import CheckInForm
-from .utils import append_checkin_to_csv, calculate_week_days, get_streak_summary, get_lifetime_weekly_checkin_count
+from .utils import append_checkin_to_csv, calculate_week_days, get_streak_summary, get_lifetime_weekly_checkin_count, get_weekly_trend
 from .models import CheckIn
 from django.utils import timezone
 from datetime import date, datetime, timedelta
@@ -73,5 +73,6 @@ def week_data(request):
         start_date = None
 
     week_days = calculate_week_days(user, start_date)
+    trend = get_weekly_trend(user, start_date)
 
-    return JsonResponse({"week_days": week_days})
+    return JsonResponse({"week_days": week_days, "trend": trend})

@@ -4,33 +4,67 @@
 <!-- Weekly Mood–Activity Relationship -->
 <div class="card shadow-sm mt-5 mood-card">
 
-    <div class="d-flex justify-content-between align-items-center">
-        <!-- Left: Mood Trend Analysis -->
-        <h6 class="card-title ps-3 pt-3 mb-0">
-            Mood Trend Analysis
-        </h6>
-        
-        <!-- Right: Date Filter -->
-        <div id="weekNav"
-            data-first-checkin="{{ first_checkin_date |date:'Y-m-d' }}"
-            data-today="{{ today |date:'Y-m-d' }}">
+<div class="container-fluid px-0">
+    <div class="row align-items-center g-0">
+
+        <!-- Left: Title -->
+        <div class="col-12 col-md-4">
+            <h6 class="card-title ps-3 pt-3 mb-0 text-center text-md-start">
+                Mood Trend Analysis
+            </h6>
         </div>
 
-        <div id="weekNavContainer" class="d-flex justify-content-between align-items-center px-3 pt-3">
-            <button id="prevWeek" class="btn btn-light btn-sm icon-xs">
-                <i class="bi bi-caret-left-fill text-primary icon-bold"></i>
-            </button>
+        <!-- Center: Weekly Trend Changes -->
+        <div class="col-12 col-md-4">
+            <div class="d-flex justify-content-center align-items-center gap-4 pt-3">
 
-            <div id="weekLabel" class="fw-semibold small text-muted mx-1">
+                <!-- Mood Weekly Trend -->
                 
+                <div class="d-flex align-items-center">
+                    <div class="small text-muted mb-0">mood</div>
+                    <div class="d-flex flex-column align-items-center trend-cell">
+                        <span id="moodMag" class="mood_mag text-muted small"></span>
+                        <div id="moodTrend" class="fw-bold px-1 text-center trend-box"></div>
+                    </div>
+                </div>
+
+                <!-- Activity Weekly Trend -->
+                <div class="d-flex align-items-center">
+                    <div class="small text-muted mb-0">activity</div>
+                    <div class="d-flex flex-column align-items-center trend-cell">
+                        <span id="activityMag" class="activity_mag text-muted small"></span>
+                        <div id="activityTrend" class="fw-bold px-1 text-center trend-box"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Right: Date Filter -->
+        <div class="col-12 col-md-4">
+            <div id="weekNav"
+                data-first-checkin="{{ first_checkin_date|date:'Y-m-d' }}"
+                data-today="{{ today|date:'Y-m-d' }}">
             </div>
 
-            <button id="nextWeek" class="btn btn-light btn-sm icon-xs">
-                <i class="bi bi-caret-right-fill text-primary icon-bold" ></i>
-            </button>
+            <div id="weekNavContainer"
+                class="d-flex justify-content-center justify-content-md-end align-items-center px-3 pt-3">
+
+                <button id="prevWeek" class="btn btn-light btn-sm icon-xs">
+                    <i class="bi bi-caret-left-fill text-primary icon-bold"></i>
+                </button>
+
+                <div id="weekLabel" class="fw-semibold small text-muted mx-2 text-center"></div>
+
+                <button id="nextWeek" class="btn btn-light btn-sm icon-xs">
+                    <i class="bi bi-caret-right-fill text-primary icon-bold"></i>
+                </button>
+
+            </div>
         </div>
 
     </div>
+</div>
 
     <div class="d-flex justify-content-between align-items-end weekly-bar-container">
 
@@ -99,7 +133,7 @@
     <!-- Information paragraph -->
     {% if weekly_unique_days >= 1 %}
         <p class="text-center text-muted small mt-3">
-            ℹ️  Tap any mood icon from the bar to view mood–activity details for that day.
+            ℹ️  Tap any mood icon from the bar to view mood–activity details for the day.
         </p>
     {% else %}
         <p class="text-center text-muted small mt-3">

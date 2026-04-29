@@ -236,6 +236,21 @@ input[type="number"] {
         0 0 0.5px currentColor;
 }
 
+.trend-box{
+    min-width:30px;
+}
+
+#weekNavContainer{
+    flex-wrap: nowrap;
+}
+
+#weekLabel{
+    min-width: 96px;
+    white-space: nowrap;
+    text-align: center;
+    display: inline-block;
+}
+
 </style>
 
 <body>
@@ -792,6 +807,29 @@ function nextStep(step) {
             document.getElementById("prevWeek").disabled = prevDisabled;
         }
 
+        function updateTrendUI(trend) {
+            const moodEl = document.getElementById("moodTrend");
+            const moodMagEl = document.getElementById("moodMag");
+
+            moodEl.classList.remove("text-success", "text-danger", "text-secondary");
+            moodEl.classList.add("text-" + trend.mood_color);
+
+            const moodSign = trend.delta_mood > 0 ? "+" : "";
+            moodEl.textContent = `${moodSign}${trend.delta_mood}`;
+            moodMagEl.textContent = trend.mood_magnitude;
+
+            const actEl = document.getElementById("activityTrend");
+            const activityMagEl = document.getElementById("activityMag");
+
+            actEl.classList.remove("text-success", "text-danger", "text-secondary");
+            actEl.classList.add("text-" + trend.activity_color);
+
+            const activitySign = trend.delta_activity > 0 ? "+" : "";
+            actEl.textContent = `${activitySign}${trend.delta_activity}`;
+            activityMagEl.textContent = trend.activity_magnitude;
+        }
+
+
         function loadWeekData() {
             const isoDate = currentWeekStart.getFullYear() + "-" +
                     String(currentWeekStart.getMonth() + 1).padStart(2, "0") + "-" +
@@ -801,6 +839,8 @@ function nextStep(step) {
                     .then(response => response.json())
                     .then(data => {
                         renderWeeklyUI(data.week_days)
+                        const trend = data.trend;
+                        updateTrendUI(trend);
                     })
                     .catch(err => {
                         console.error("DEBUG → Fetch error:", err);
@@ -827,6 +867,7 @@ function nextStep(step) {
         });
 
     });
+
 </script>
 
 </html>

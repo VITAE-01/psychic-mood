@@ -125,6 +125,7 @@ def calc_belief_balance_index_threshold(user):
     if len(belief_balance_index_values) < 4 :  # Not enough data points to calculate meaningful quartiles
         return None, None, None
     
+    # Calculate Q1, Median and Q3 using numpy's percentile function
     q1 = round((float(np.percentile(belief_balance_index_values, 25))), 2)
     q3 = round((float(np.percentile(belief_balance_index_values, 75))), 2)
     median = float(np.percentile(belief_balance_index_values, 50))
@@ -393,3 +394,122 @@ def get_streak_summary(user):
         return f"🌟 {streak} days streak of tuning into your mood — you're really in tune with yourself"
 
     return f"🌿 {streak} days streak of mood check-In — keep noticing how you feel"
+
+# Function to calculate the average mood score and activity intensity for the current week
+def get_weekly_activity_mood_averages(user, start_date=None):
+    today, start_of_week, end_of_week, max_days = get_week_range(start_date)
+
+    # Mood
+    mood_avg = (
+        CheckIn.objects.filter(
+            user=user,
+            created_at__date__gte=start_of_week,
+            created_at__date__lte=end_of_week
+        ).aggregate(avg=Avg("mood_score"))["avg"]
+    )
+
+    # Activity (intensity percent)
+    weekly_activity_aggregate = CheckIn.objects.filter(
+        user=user,
+        created_at__date__gte=start_of_week,
+        created_at__date__lte=end_of_week
+    )
+
+    # Initialise breakdown for each activity type
+    breakdown = {field: 0 for field in ACTIVITY_FIELDS}
+
+    # Sum intensities across multiple entries
+    for entry in weekly_activity_aggregate:
+        for field in ACTIVITY_FIELDS:
+            raw_value = getattr(entry, field, 0) or 0
+
+            try:
+                value = int(raw_value or 0)
+            except ValueError:
+                value = 0
+
+            breakdown[field] += value
+
+    if weekly_activity_aggregate:
+        activity_avg = sum(breakdown.values()) / len(weekly_activity_aggregate)
+    else:
+        activity_avg = None
+
+    return {
+        "weekly_mood_avg": mood_avg,
+        "weekly_activity_avg": activity_avg
+    }
+
+def relative_change(current, previous):
+    if current is None or previous is None or previous == 0:
+        return None
+    return (current - previous) / previous
+
+def classify_weekly_change(delta):
+    if delta is None:
+        return { "color": "secondary", "magnitude": None}
+
+    if delta == 0:
+        return {"color": "secondary", "magnitude": "none"}
+
+    color = "success" if delta > 0 else "danger"
+    abs_delta = abs(delta)
+
+    # cohens thresholds for small, medium, large effects size
+    if abs_delta < 0.10:
+        magnitude = "xs"
+    elif abs_delta < 0.30:
+        magnitude = "sm"
+    elif abs_delta < 0.50:
+        magnitude = "md"
+    else:
+        magnitude = "lg"
+
+    return {
+        "color": color,
+        "magnitude": magnitude,
+    }
+
+def get_weekly_trend(user, start_of_week):
+    # Current week
+    current = get_weekly_activity_mood_averages(user, start_of_week)
+
+    # Previous week
+    prev_week_start = start_of_week - timedelta(days=7)
+    previous = get_weekly_activity_mood_averages(user, prev_week_start)
+
+    # Compute deltas
+    delta_mood = relative_change(current["weekly_mood_avg"], previous["weekly_mood_avg"])
+    delta_activity = relative_change(current["weekly_activity_avg"], previous["weekly_activity_avg"])
+
+    # Classify
+    mood_direction = classify_weekly_change(delta_mood)
+    activity_direction = classify_weekly_change(delta_activity)
+
+    if previous["weekly_mood_avg"] is None or previous["weekly_activity_avg"] is None:
+        return {
+        "current_week_mood": round(current["weekly_mood_avg"], 2) if current["weekly_mood_avg"] else None,
+        "previous_week_mood": None,
+        "current_week_activity": round(current["weekly_activity_avg"], 2) if current["weekly_activity_avg"] else None,
+        "previous_week_activity": None,
+        "delta_mood": 0.00,
+        "delta_activity": 0.00,
+        "mood_color": "secondary",
+        "mood_magnitude": "baseline",
+        "activity_color": "secondary",
+        "activity_magnitude": "baseline",
+        }
+
+    trend = {
+        "current_week_mood": round((current["weekly_mood_avg"]), 2) if current["weekly_mood_avg"] else None,
+        "previous_week_mood": round((previous["weekly_mood_avg"]), 2) if previous["weekly_mood_avg"] else None,
+        "current_week_activity": round((current["weekly_activity_avg"]), 2) if current["weekly_activity_avg"] else None,
+        "previous_week_activity": round((previous["weekly_activity_avg"]), 2) if previous["weekly_activity_avg"] else None,
+        "delta_mood": round((delta_mood), 2) if delta_mood is not None else None,
+        "delta_activity": round((delta_activity), 2) if delta_activity is not None else None,
+        "mood_color": mood_direction["color"],
+        "mood_magnitude": mood_direction["magnitude"],
+        "activity_color": activity_direction["color"],
+        "activity_magnitude": activity_direction["magnitude"],
+    }
+    return trend
