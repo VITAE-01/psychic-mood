@@ -24,7 +24,6 @@ def dashboard_index(request):
         "first_checkin_date": first_checkin_date,
         "today": timezone.localdate()
     }
-    print(f"User has checked in {has_checked_in_today} number of times today")
     return render(request, 'dashboard/dashboard_index.html', context)
 
 def submit_checkin(request):

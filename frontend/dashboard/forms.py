@@ -36,6 +36,44 @@ def map_intensity_to_duration(total):
         return "30–45 mins"
     return "45 mins+"
 
+HBM_INTERPRETATION = {
+    "strong_negative": {
+        "activity": "You were active today despite strong perceived barriers to being active.",
+        "no_activity": "Strong perceived barriers likely prevented you from being active today."
+    },
+
+    "weak_negative": {
+        "activity": "You were active today even though some perceived barriers were present.",
+        "no_activity": "Some perceived barriers may have prevented you from being active today."
+    },
+
+    "neutral": {
+        "activity": "Your beliefs about activity were fairly balanced today between benefits, barriers, and confidence.",
+        "no_activity": "Your beliefs about activity were fairly balanced today between benefits, barriers, and confidence."
+    },
+
+    "weak_positive_pb": {
+        "activity": "You were active today while recognizing some benefits of being active.",
+        "no_activity": "Your beliefs leaned slightly toward the benefits of being active today."
+    },
+
+    "weak_positive_se": {
+        "activity": "You were active today with some confidence in your ability to be active.",
+        "no_activity": "Your beliefs leaned slightly toward confidence in being active today."
+    },
+
+    "strong_positive_pb": {
+        "activity": "You were active today with a strong belief in the benefits of being active.",
+        "no_activity": "Your beliefs strongly emphasized the benefits of being active today."
+    },
+
+    "strong_positive_se": {
+        "activity": "You were active today with strong confidence in your ability to be active.",
+        "no_activity": "Your beliefs strongly emphasized confidence in being active today."
+    }
+}
+
+
 class CheckInForm(forms.ModelForm):
     class Meta:
         model = CheckIn
