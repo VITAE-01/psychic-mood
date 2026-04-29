@@ -4,8 +4,9 @@ import threading
 from django.utils import timezone
 from .models import CheckIn
 from datetime import datetime, timedelta
-from django.db.models import Avg
-from .forms import MOOD_MAP, map_intensity_to_duration, likert_round
+from django.db.models import Avg, F
+import numpy as np
+from .forms import MOOD_MAP, HBM_INTERPRETATION, map_intensity_to_duration, likert_round
 
 # Utility functions for date handling
 def get_week_range(reference_date=None):
@@ -74,6 +75,120 @@ def append_checkin_to_csv(checkin):
 
             writer.writerow(row)
 
+# Function to calculate the BBI threshold values (Q1, Median and Q3) for a given user
+def calc_belief_balance_index_threshold(user):
+    BBI_EPSILON = 1e-6  # avoid division by zero
+    belief_balance_index_values = []
+
+    checkins = list(
+        CheckIn.objects.filter(user=user)
+        .order_by("created_at")
+        .values(
+            "created_at",
+            "perceived_benefits",
+            "self_efficacy",
+            "barrier_tired",
+            "barrier_time",
+            "barrier_others",
+        )
+    )
+
+    if not checkins:
+        return None, None, None
+    
+    daily_entries = {}
+    for entry in checkins:
+        day = entry["created_at"].date()
+        if day not in daily_entries:
+            daily_entries[day] = entry
+
+    for entry in daily_entries.values():
+
+        perceived_benefits = int(entry["perceived_benefits"] or 0)
+        self_efficacy = int(entry["self_efficacy"] or 0)
+
+        barrier_tired = int(entry["barrier_tired"] or 0)
+        barrier_time = int(entry["barrier_time"] or 0)
+        barrier_others = int(entry["barrier_others"] or 0)
+
+        barrier_composite = barrier_tired + barrier_time + barrier_others
+
+        if (perceived_benefits + self_efficacy + barrier_composite) == 0:
+            continue
+
+        numerator = (perceived_benefits + self_efficacy) - barrier_composite
+        denominator = (perceived_benefits + self_efficacy) + barrier_composite + BBI_EPSILON
+
+        belief_balance_index = round((numerator / denominator), 2)
+        belief_balance_index_values.append(belief_balance_index)
+
+    if len(belief_balance_index_values) < 4 :  # Not enough data points to calculate meaningful quartiles
+        return None, None, None
+    
+    q1 = round((float(np.percentile(belief_balance_index_values, 25))), 2)
+    q3 = round((float(np.percentile(belief_balance_index_values, 75))), 2)
+    median = float(np.percentile(belief_balance_index_values, 50))
+
+
+    return q1, median, q3
+
+# Function to calculate the belief values for a given user and day
+def get_daily_belief_summary(user, day):
+    BBI_EPSILON = 1e-6  # avoid division by zero
+
+    try:
+        entry = CheckIn.objects.filter(user=user, created_at__date=day).first()
+    except CheckIn.DoesNotExist:
+        return {
+            "perceived_benefits": None,
+            "self_efficacy": None,
+            "barrier_composite": None,
+            "belief_balance_index": None,
+        }
+
+    perceived_benefits = int(getattr(entry, "perceived_benefits", 0) or 0)
+    self_efficacy = int(getattr(entry, "self_efficacy", 0) or 0)
+
+    barrier_tired = int(getattr(entry, "barrier_tired", 0) or 0)
+    barrier_time = int(getattr(entry, "barrier_time", 0) or 0)
+    barrier_others = int(getattr(entry, "barrier_others", 0) or 0)
+
+    barrier_composite = barrier_tired + barrier_time + barrier_others
+
+    # Compute BBI (range: -1 to +1)
+    numerator = (perceived_benefits + self_efficacy) - barrier_composite
+    denominator = (perceived_benefits + self_efficacy) + barrier_composite + BBI_EPSILON
+
+    daily_belief_balance_index = round((numerator / denominator), 2)
+
+    return {
+        "perceived_benefits": perceived_benefits,
+        "self_efficacy": self_efficacy,
+        "barrier_composite": barrier_composite,
+        "daily_belief_balance_index": daily_belief_balance_index,
+    }
+
+# Function to classify the daily BBI into categories based on Q1, median and Q3 thresholds
+def classify_daily_hbm(bbi, q1, median, q3):
+
+    if bbi is None or q1 is None or median is None or q3 is None:
+        return "no_data"
+
+    if bbi < q1:
+        return "strong_negative"
+
+    if q1 <= bbi < median:
+        return "weak_negative"
+
+    if abs(bbi - median) < 1e-6:
+        return "neutral"
+
+    if median < bbi <= q3:
+        return "weak_positive"
+
+    if bbi > q3:
+        return "strong_positive"
+
 # Function to calculate the total activity intensity for a given user and day
 def get_daily_activity_summary(user, day):
     activity_aggregate = CheckIn.objects.filter(
@@ -115,9 +230,44 @@ def get_daily_activity_summary(user, day):
         "intensity_percent": activity_intensity_report
     }
 
+# Main function to generate the daily HBM summary for a given user and day, using the BBI thresholds
+def get_daily_hbm_summary(user, day, q1, median, q3):
+    belief = get_daily_belief_summary(user, day)
+    bbi = belief["daily_belief_balance_index"]
+    
+    if bbi is None:
+        return None
+
+    # Get belief summary
+    pb = belief["perceived_benefits"] or 0
+    se = belief["self_efficacy"] or 0
+    dominance = "pb" if pb > se else "se"
+
+    # Get activity summary
+    activity_summary = get_daily_activity_summary(user, day)
+    did_activity = activity_summary["intensity_percent"] > 0
+    activity_key = "activity" if did_activity else "no_activity"
+
+    # HBM classification
+    hbm_class = classify_daily_hbm(bbi, q1, median, q3)
+
+    # --- Step 6: Map to interpretation key ---
+    if hbm_class == "no_data":
+        interp_key = "no_data"
+    
+    elif hbm_class in ["strong_negative", "weak_negative", "neutral"]:
+        interp_key = hbm_class
+    else:
+        # positive tiers depend on PB vs SE dominance
+        interp_key = f"{hbm_class}_{dominance}"
+
+    # --- Step 8: Return the final interpretation sentence ---
+    return HBM_INTERPRETATION.get(interp_key, {}).get(activity_key)
+
 # Function to calculate mood data for each day of the current week
 def calculate_week_days(user, start_date=None):
     today, start_of_week, end_of_week, max_days = get_week_range(start_date)
+    q1, median, q3 = calc_belief_balance_index_threshold(user)
     week_days = []
 
     for i in range(max_days):
@@ -135,6 +285,8 @@ def calculate_week_days(user, start_date=None):
         # Calculate total activity summary and intensity for the day
         activity_summary = get_daily_activity_summary(user, day)
 
+        daily_hbm_summary = get_daily_hbm_summary(user, day, q1, median, q3)
+
         week_days.append({
             "label": day.strftime("%a"),
             "month": day.strftime("%b"),
@@ -142,12 +294,12 @@ def calculate_week_days(user, start_date=None):
             "date": day.strftime("%d"),
             "iso_date": day.isoformat(),
             "is_today": (day == today),
+            "daily_hbm_summary": daily_hbm_summary,
             "mood": mood_key,
             "mood_score": rounded_score,
             "activity_breakdown": activity_summary["activity_breakdown"],
             "activity_intensity_report": activity_summary["intensity_percent"],
         })
-
     return week_days
 
 # Function to calculate the current streak of consecutive check-in days
