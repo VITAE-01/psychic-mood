@@ -70,7 +70,12 @@ HBM_INTERPRETATION = {
     "strong_positive_se": {
         "activity": "You were active today with strong confidence in your ability to be active.",
         "no_activity": "Your beliefs strongly emphasized confidence in being active today."
-    }
+    },
+    
+    "no_data": {
+        "activity": "Belief insights will appear once you’ve logged a few days of activity and beliefs.",
+        "no_activity": "Belief insights will appear once you’ve logged a few days of activity and beliefs."
+    },
 }
 
 

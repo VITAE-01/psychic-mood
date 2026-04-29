@@ -122,8 +122,8 @@ def calc_belief_balance_index_threshold(user):
         belief_balance_index = round((numerator / denominator), 2)
         belief_balance_index_values.append(belief_balance_index)
 
-    if len(belief_balance_index_values) < 4:
-        return None, None
+    if len(belief_balance_index_values) < 4 :  # Not enough data points to calculate meaningful quartiles
+        return None, None, None
     
     q1 = round((float(np.percentile(belief_balance_index_values, 25))), 2)
     q3 = round((float(np.percentile(belief_balance_index_values, 75))), 2)
@@ -170,7 +170,8 @@ def get_daily_belief_summary(user, day):
 
 # Function to classify the daily BBI into categories based on Q1, median and Q3 thresholds
 def classify_daily_hbm(bbi, q1, median, q3):
-    if bbi is None:
+
+    if bbi is None or q1 is None or median is None or q3 is None:
         return "no_data"
 
     if bbi < q1:
@@ -233,7 +234,7 @@ def get_daily_activity_summary(user, day):
 def get_daily_hbm_summary(user, day, q1, median, q3):
     belief = get_daily_belief_summary(user, day)
     bbi = belief["daily_belief_balance_index"]
-
+    
     if bbi is None:
         return None
 
@@ -251,7 +252,10 @@ def get_daily_hbm_summary(user, day, q1, median, q3):
     hbm_class = classify_daily_hbm(bbi, q1, median, q3)
 
     # --- Step 6: Map to interpretation key ---
-    if hbm_class in ["strong_negative", "weak_negative", "neutral"]:
+    if hbm_class == "no_data":
+        interp_key = "no_data"
+    
+    elif hbm_class in ["strong_negative", "weak_negative", "neutral"]:
         interp_key = hbm_class
     else:
         # positive tiers depend on PB vs SE dominance
